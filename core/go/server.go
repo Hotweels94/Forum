@@ -31,8 +31,10 @@ func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func HandleTest() {
+func HandleForum() {
 	http.Handle("/", new(mainInfo))
 	http.Handle("/test", new(web))
+	http.Handle("/login", new(user))
+	http.Handle("/register", new(user))
 	http.ListenAndServe(":8080", nil)
 }
