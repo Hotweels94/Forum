@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
@@ -25,8 +26,8 @@ func initDB() (*sql.DB, error) {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			email TEXT NOT NULL UNIQUE,
-			username TEXT NOT NULL UNIQUE,
+			email TEXT NOT NULL,
+			username TEXT NOT NULL,
 			password TEXT NOT NULL
 		)
 	`)
@@ -37,13 +38,16 @@ func initDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func insertUser(db *sql.DB, username string, password string) error {
+func insertUser(db *sql.DB, email string, username string, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO users (username, password) VALUES(?, ?)", username, hashedPassword)
+	_, err = db.Exec("INSERT INTO users (email, username, password) VALUES(?, ?, ?)", email, username, hashedPassword)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return err
 }
 
@@ -58,9 +62,8 @@ func verifyLog(db *sql.DB, username string, password string) bool {
 	return err == nil
 }
 
-// ServeHTTP for login page
+// ServeHTTP for register page
 func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	db, err := initDB()
 	if err != nil {
 		return
@@ -68,22 +71,15 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	if r.Method == "POST" {
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-		u.username = strings.TrimSpace(r.Form.Get("username"))
-		u.email = strings.TrimSpace(r.Form.Get("email"))
-		u.password = r.Form.Get("password")
+		u.username = strings.TrimSpace(r.FormValue("username"))
+		u.email = strings.TrimSpace(r.FormValue("email"))
+		u.password = r.FormValue("password")
 
-		if verifyLog(db, u.username, u.password) {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
+		insertUser(db, u.email, u.username, u.password)
+		fmt.Println(u.email, u.username, u.password)
 	}
 
-	t, _ := template.ParseFiles("src/html/login.html")
+	t, _ := template.ParseFiles("src/html/register.html")
 	t.Execute(w, u)
 
 }
