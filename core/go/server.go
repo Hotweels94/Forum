@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+// http://localhost:8080/ -> Forum Jeux video
+
 type mainInfo struct {
 	PageName      string
 	NumberOfVisit int
