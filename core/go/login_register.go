@@ -26,9 +26,9 @@ func initDB() (*sql.DB, error) {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			email TEXT NOT NULL,
-			username TEXT NOT NULL,
-			password TEXT NOT NULL
+			email TEXT NOT NULL UNIQUE,
+			username TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL UNIQUE
 		)
 	`)
 	if err != nil {
