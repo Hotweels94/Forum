@@ -12,9 +12,9 @@ import (
 )
 
 type user struct {
-	email    string
-	username string
-	password string
+	Email    string
+	Username string
+	Password string
 }
 
 func initDB() (*sql.DB, error) {
@@ -70,16 +70,37 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	if r.Method == "POST" {
-		u.username = strings.TrimSpace(r.FormValue("username"))
-		u.email = strings.TrimSpace(r.FormValue("email"))
-		u.password = r.FormValue("password")
+	var t *template.Template
 
-		insertUser(db, u.email, u.username, u.password)
-		fmt.Println(u.email, u.username, u.password)
+	if r.URL.Path == "/register" {
+		if r.Method == "POST" {
+			u.Username = strings.TrimSpace(r.FormValue("username"))
+			u.Email = strings.TrimSpace(r.FormValue("email"))
+			u.Password = r.FormValue("password")
+
+			insertUser(db, u.Email, u.Username, u.Password)
+			fmt.Println(u.Email, u.Username, u.Password)
+		}
+		t, _ = template.ParseFiles("src/html/register.html")
 	}
 
-	t, _ := template.ParseFiles("src/html/register.html")
+	if r.URL.Path == "/login" {
+		if r.Method == "POST" {
+			u.Username = strings.TrimSpace(r.FormValue("username"))
+			u.Password = r.FormValue("password")
+
+			if verifyLog(db, u.Username, u.Password) {
+				http.Redirect(w, r, "/profile", http.StatusFound)
+				return
+			}
+		}
+		t, _ = template.ParseFiles("src/html/login.html")
+	}
+
+	if r.URL.Path == "/profile" {
+		t, _ = template.ParseFiles("src/html/profile.html")
+	}
+
 	t.Execute(w, u)
 
 }
