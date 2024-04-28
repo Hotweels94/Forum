@@ -18,7 +18,7 @@ type user struct {
 }
 
 func initDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./databases/forumRegister.db")
+	db, err := sql.Open("sqlite3", "./databases/forum.db")
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,6 @@ func verifyLog(db *sql.DB, username string, password string) bool {
 	return err == nil
 }
 
-// ServeHTTP for register page
 func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDB()
 	if err != nil {
