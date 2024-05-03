@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+body{
+    font-family: "Open Sans", sans-serif;
+    background-color: #141414;
+    padding: 0;
+    margin: 0;
+    color: #fff;
+}
+
+body .page {
+    margin: 20px 80px;
+}
+
+nav{
+    display: flex;
+    flex-wrap: wrap; /* passer a la ligne */ 
+    justify-content: space-between; /* ecart onglets / buttons */ 
+    position: sticky;  /* Barre du haut reste fixe */
+    top: 0;
+    background-color: #141414;
+    padding: 10px 0px;
+}
+
+nav .onglets {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+nav .onglets a{
+    margin-right: 20px;
+    text-decoration: none;
+    color: #fff;
+}
+
+nav .Login_Register button{
+    padding: 13px 20px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+}
+
+nav .Login_Register .login{
+    background-color: inherit;
+    margin-right: 10px;
+    color: #8f8f8f;
+}
+
+nav .Login_Register .register{
+    background-color: crimson;
+    margin-right: 10px;
+    color: #fff;
+}

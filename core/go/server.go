@@ -25,13 +25,14 @@ func (web *web) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.NumberOfVisit++
-	m.PageName = "Forum Jeux video !! There are : " + strconv.Itoa(m.NumberOfVisit) + " visits !!"
+	m.PageName = "Il y a " + strconv.Itoa(m.NumberOfVisit) + " visites !!"
 	t, _ := template.ParseFiles("src/html/index.html")
 	t.Execute(w, m)
 
 }
 
 func HandleForum() {
+	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("src"))))
 	http.Handle("/", new(mainInfo))
 	http.Handle("/test", new(web))
 	http.Handle("/register", new(user))
