@@ -41,13 +41,55 @@ nav .Login_Register button{
     outline: none;
 }
 
-nav .Login_Register .login{
+nav .Login_Register .login_button{
     background-color: inherit;
     margin-right: 10px;
     color: #8f8f8f;
 }
 
-nav .Login_Register .register{
+nav .Login_Register .register_button{
+    background-color: crimson;
+    margin-right: 10px;
+    color: #fff;
+}
+
+.register_page {
+    margin: 50px auto;
+    width: 50%;
+    padding: 100px;
+}
+
+.register_page input {
+    margin-bottom: 20px;
+}
+
+.register_page .register_button {
+    padding: 13px 20px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+    background-color: crimson;
+    margin-right: 10px;
+    color: #fff;
+}
+
+.login_page {
+    margin: 50px auto;
+    width: 50%;
+    padding: 100px;
+}
+
+.login_page input {
+    margin-bottom: 20px;
+}
+
+.login_page .login_button {
+    padding: 13px 20px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
     background-color: crimson;
     margin-right: 10px;
     color: #fff;
