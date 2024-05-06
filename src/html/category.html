@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer une catégorie</title>
+</head>
+<body>
+    <h1>Créer une catégorie</h1>
+    <form action="/category" method="post">
+        <label for="name">Nom de la catégorie:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="description">Description de la catégorie:</label><br>
+        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+
+        <input type="submit" value="Créer">
+    </form>
+</body>
+</html>

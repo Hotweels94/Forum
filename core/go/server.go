@@ -39,5 +39,6 @@ func HandleForum() {
 	http.Handle("/login", new(user))
 	http.Handle("/profile", new(user))
 	http.Handle("/post", new(Post))
+	http.Handle("/category", new(Category))
 	http.ListenAndServe(":8080", nil)
 }
