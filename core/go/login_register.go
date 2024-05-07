@@ -51,9 +51,9 @@ func insertUser(db *sql.DB, email string, username string, password string) erro
 	return err
 }
 
-func verifyLog(db *sql.DB, username string, password string) bool {
+func verifyLog(db *sql.DB, usernameOrEmail string, password string) bool {
 	var hashedPassword string
-	err := db.QueryRow("SELECT password FROM users WHERE username = ?", username).Scan(&hashedPassword)
+	err := db.QueryRow("SELECT password FROM users WHERE username = ? OR email = ?", usernameOrEmail, usernameOrEmail).Scan(&hashedPassword)
 	if err != nil {
 		return false
 	}
