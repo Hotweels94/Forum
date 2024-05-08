@@ -12,10 +12,16 @@ import (
 )
 
 type Post struct {
-	User     string
-	Text     string
-	Title    string
-	ImageURL string
+	User             string
+	Text             string
+	Title            string
+	ImageURL         string
+	SelectedCategory int
+}
+
+type PostPage struct {
+	Post       Post
+	Categories []Category
 }
 
 func initDBPost() (*sql.DB, error) {
@@ -60,12 +66,13 @@ const uploadPath = "databases/upload_image"
 func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBPost()
 	if err != nil {
+		http.Error(w, "Erreur lors de la connexion à la base de données", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
 
 	var t *template.Template
-
+	var categories []Category
 	switch r.URL.Path {
 	case "/post":
 		if r.Method == "POST" {
@@ -83,6 +90,26 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			defer file.Close()
+
+			rows, err := db.Query("SELECT id, name, description FROM category")
+			if err != nil {
+				http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
+				return
+			}
+			defer rows.Close()
+
+			for rows.Next() {
+				var category Category
+				if err := rows.Scan(&category.ID, &category.Name, &category.Description); err != nil {
+					http.Error(w, "Erreur lors de la lecture des catégories depuis la base de données", http.StatusInternalServerError)
+					return
+				}
+				categories = append(categories, category)
+			}
+			if err := rows.Err(); err != nil {
+				http.Error(w, "Erreur lors de la lecture des catégories depuis la base de données", http.StatusInternalServerError)
+				return
+			}
 
 			if err == nil {
 				ext := filepath.Ext(fileHeader.Filename)
@@ -134,7 +161,12 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t.Execute(w, p)
+	pp := PostPage{
+		Post:       p,
+		Categories: categories,
+	}
+
+	t.Execute(w, pp)
 }
 
 func generateUniqueFilename(uploadPath string, ext string) (string, error) {

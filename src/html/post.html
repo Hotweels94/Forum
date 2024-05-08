@@ -11,6 +11,12 @@
     <form action="/post" method="post" enctype="multipart/form-data">
         <label for="title">Titre du post:</label><br>
         <input type="text" id="title" name="title" required><br><br>
+        <label for="category">Catégorie:</label><br>
+        <select id="category" name="category" >
+            {{range .Categories}}
+                <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+        </select><br><br>
 
         <label for="content">Contenu:</label><br>
         <textarea id="content" name="content" rows="4" cols="50" required></textarea><br><br>
