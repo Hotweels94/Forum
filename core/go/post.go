@@ -72,7 +72,7 @@ func GetPostByID(db *sql.DB, id string) (Post, error) {
 	return post, nil
 }
 
-const uploadPath = "databases/upload_image"
+const uploadPath = "/databases/upload_image"
 
 func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBPost()
