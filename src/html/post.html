@@ -3,28 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster sur le Forum</title>
+    <title>{{.Title}}</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body>
-    <h1>Poster sur le Forum</h1>
-    <form action="/post" method="post" enctype="multipart/form-data">
-        <label for="title">Titre du post:</label><br>
-        <input type="text" id="title" name="title" required><br><br>
-        <label for="category">Catégorie:</label><br>
-        <select id="category" name="category" >
-            {{range .Categories}}
-                <option value="{{.ID}}">{{.Name}}</option>
-            {{end}}
-        </select><br><br>
-
-        <label for="content">Contenu:</label><br>
-        <textarea id="content" name="content" rows="4" cols="50" required></textarea><br><br>
-
-        <label for="image">Image (max 20MB):</label><br>
-        <input type="file" id="image" name="image" accept="image/jpeg, image/png, image/gif"><br><br>
-
-        <input type="submit" value="Poster">
-    </form>
+    <h2>{{.Title}}</h2>
+    <h2>Post de : {{.User}}</h2>
+    <p>{{.Text}}</p>
+    {{if .ImageURL}}
+        <img src ="{{.ImageURL}}" alt ="Image">
+    {{end}}
 </body>
 </html>

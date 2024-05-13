@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -17,6 +18,7 @@ type Post struct {
 	Title            string
 	ImageURL         string
 	SelectedCategory int
+	Categories       []Category
 }
 
 type PostPage struct {
@@ -53,12 +55,21 @@ func insertPost(db *sql.DB, user string, text string, title string, imageURL str
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO post (id, user, text, title,imageURL) VALUES(?, ?, ?, ?, ?)", id.String(), user, text, title, imageURL)
+	_, err = db.Exec("INSERT INTO post (id, user, text, title, imageURL) VALUES(?, ?, ?, ?, ?)", id.String(), user, text, title, imageURL)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func GetPostByID(db *sql.DB, id string) (Post, error) {
+	var post Post
+	err := db.QueryRow("SELECT user, text, title, imageURL FROM post WHERE id = ?", id).Scan(&post.User, &post.Text, &post.Title, &post.ImageURL)
+	if err != nil {
+		return Post{}, err
+	}
+	return post, nil
 }
 
 const uploadPath = "databases/upload_image"
@@ -75,6 +86,20 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var categories []Category
 	switch r.URL.Path {
 	case "/post":
+
+		id := r.URL.Query().Get("id")
+		if id != "" {
+			post, err := GetPostByID(db, id)
+			if err != nil {
+				http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
+				return
+			}
+			t, _ := template.ParseFiles("src/html/post.html")
+			t.Execute(w, post)
+			fmt.Println(post)
+			return
+		}
+
 		if r.Method == "POST" {
 			err := r.ParseMultipartForm(20 << 20)
 			if err != nil {
@@ -154,8 +179,10 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			http.Redirect(w, r, "/", http.StatusFound)
+
 		}
-		t, _ = template.ParseFiles("src/html/post.html")
+		t, _ = template.ParseFiles("src/html/create_post.html")
+
 	default:
 		http.NotFound(w, r)
 		return
