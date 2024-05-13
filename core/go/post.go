@@ -155,10 +155,10 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, "Erreur lors de la génération de l'ID de fichier unique", http.StatusInternalServerError)
 					return
 				}
-				filePath := filepath.Join(uploadPath, fileID+ext)
+				filePath := filepath.Join("databases/upload_image", fileID+ext)
 				outFile, err := os.Create(filePath)
 				if err != nil {
-					http.Error(w, "Erreur lors de la création du fichier", http.StatusInternalServerError)
+					http.Error(w, "Erreur lors de la création du fichier ", http.StatusInternalServerError)
 					return
 				}
 				defer outFile.Close()
@@ -169,7 +169,7 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				p.ImageURL = "databases/upload_image/" + fileID + ext
+				p.ImageURL = uploadPath + "/" + fileID + ext
 			}
 
 			err = insertPost(db, p.User, p.Text, p.Title, p.ImageURL)
