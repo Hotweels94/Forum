@@ -32,7 +32,10 @@ func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleForum() {
+
 	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("src"))))
+	http.Handle("/databases/upload_image/", http.StripPrefix("/databases/upload_image/", http.FileServer(http.Dir("databases/upload_image"))))
+
 	http.Handle("/", new(mainInfo))
 	http.Handle("/test", new(web))
 	http.Handle("/register", new(user))
