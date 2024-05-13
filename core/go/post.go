@@ -169,7 +169,7 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				p.ImageURL = "databases/upload_image" + fileID + ext
+				p.ImageURL = "databases/upload_image/" + fileID + ext
 			}
 
 			err = insertPost(db, p.User, p.Text, p.Title, p.ImageURL)
