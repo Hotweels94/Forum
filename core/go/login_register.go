@@ -12,9 +12,10 @@ import (
 )
 
 type user struct {
-	Email    string
-	Username string
-	Password string
+	Email       string
+	Username    string
+	Password    string
+	IsConnected bool
 }
 
 func initDB() (*sql.DB, error) {
@@ -51,9 +52,9 @@ func insertUser(db *sql.DB, email string, username string, password string) erro
 	return err
 }
 
-func verifyLog(db *sql.DB, usernameOrEmail string, password string) bool {
+func verifyLog(db *sql.DB, username string, email string, password string) bool {
 	var hashedPassword string
-	err := db.QueryRow("SELECT password FROM users WHERE username = ? OR email = ?", usernameOrEmail, usernameOrEmail).Scan(&hashedPassword)
+	err := db.QueryRow("SELECT password FROM users WHERE username = ? OR email = ?", username, email).Scan(&hashedPassword)
 	if err != nil {
 		return false
 	}
@@ -85,11 +86,15 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path == "/login" {
 		if r.Method == "POST" {
-			u.Username = strings.TrimSpace(r.FormValue("username"))
+			u.Username = strings.TrimSpace(r.FormValue("username or email"))
+			u.Email = strings.TrimSpace(r.FormValue("username or email"))
 			u.Password = r.FormValue("password")
 
-			if verifyLog(db, u.Username, u.Password) {
+			if verifyLog(db, u.Username, u.Email, u.Password) {
+				u.IsConnected = true
 				http.Redirect(w, r, "/profile", http.StatusFound)
+				u.IsConnected = true
+				fmt.Println(u.IsConnected)
 				return
 			}
 		}

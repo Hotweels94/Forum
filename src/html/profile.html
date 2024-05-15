@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body>
-    <h1>Profile de {{ .Username }}</h1>
+    {{if .IsConnected}}
+        <h1>Vous etes co</h1>
+    {{else}}
+        <h1>Vous n'etes pas co</h1>
+    {{end}}
 </body>
 </html>
