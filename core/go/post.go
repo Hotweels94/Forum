@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gofrs/uuid"
 )
@@ -32,15 +33,16 @@ func initDBPost() (*sql.DB, error) {
 	}
 
 	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS post (
-			id TEXT PRIMARY KEY,
-			user TEXT NOT NULL,
-			text TEXT NOT NULL,
-			title TEXT NOT NULL,
-			imageURL TEXT, 
-			UNIQUE(id)
-		)
-	`)
+        CREATE TABLE IF NOT EXISTS post (
+            id TEXT PRIMARY KEY,
+            user TEXT NOT NULL,
+            text TEXT NOT NULL,
+            title TEXT NOT NULL,
+            imageURL TEXT,
+            category_id INTEGER NOT NULL,
+            UNIQUE(id)
+        )
+    `)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +50,13 @@ func initDBPost() (*sql.DB, error) {
 	return db, nil
 }
 
-func insertPost(db *sql.DB, user string, text string, title string, imageURL string) error {
+func insertPost(db *sql.DB, user string, text string, title string, imageURL string, categoryID int) error {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO post (id, user, text, title, imageURL) VALUES(?, ?, ?, ?, ?)", id.String(), user, text, title, imageURL)
+	_, err = db.Exec("INSERT INTO post (id, user, text, title, imageURL, category_id) VALUES(?, ?, ?, ?, ?, ?)", id.String(), user, text, title, imageURL, categoryID)
 	if err != nil {
 		return err
 	}
@@ -104,6 +106,12 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			p.Title = r.FormValue("title")
 			p.Text = r.FormValue("content")
+			categoryIDStr := r.FormValue("category")
+			categoryID, err := strconv.Atoi(categoryIDStr)
+			if err != nil {
+				http.Error(w, "ID de catégorie invalide", http.StatusBadRequest)
+				return
+			}
 
 			file, fileHeader, err := r.FormFile("image")
 			if err != nil && err != http.ErrMissingFile {
@@ -149,8 +157,7 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 				p.ImageURL = uploadPath + "/" + fileID + ext
 			}
-
-			err = insertPost(db, p.User, p.Text, p.Title, p.ImageURL)
+			err = insertPost(db, p.User, p.Text, p.Title, p.ImageURL, categoryID)
 			if err != nil {
 				http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
 				return
