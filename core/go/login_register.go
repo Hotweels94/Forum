@@ -93,7 +93,6 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if verifyLog(db, u.Username, u.Email, u.Password) {
 				u.IsConnected = true
 				http.Redirect(w, r, "/profile", http.StatusFound)
-				u.IsConnected = true
 				fmt.Println(u.IsConnected)
 				return
 			}

@@ -94,3 +94,20 @@ nav .Login_Register .register_button{
     margin-right: 10px;
     color: #fff;
 }
+
+.list_categories {
+    margin: 50px auto;
+    width: 50%;
+    padding: 100px;
+}
+
+.list_categories .button_categories {
+    padding: 13px 20px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+    background-color: crimson;
+    margin-right: 10px;
+    color: #fff;
+}
