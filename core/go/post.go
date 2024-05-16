@@ -110,44 +110,45 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de la récupération du fichier", http.StatusInternalServerError)
 				return
 			}
-			defer file.Close()
-			if err != nil {
-				http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
-				return
-			}
-			ext := filepath.Ext(fileHeader.Filename)
-			allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
-			if !allowedExts[ext] {
-				http.Error(w, "Extension de fichier non autorisée", http.StatusBadRequest)
-				return
-			}
+			if err == nil {
+				defer file.Close()
 
-			fileSize := fileHeader.Size
-			var maxFileSize int64 = 20 * 1024 * 1024
-			if fileSize > maxFileSize {
-				http.Error(w, "Image trop grande (max 20 Mo)", http.StatusBadRequest)
-				return
-			}
-			fileID, err := generateUniqueFilename(uploadPath, ext)
-			if err != nil {
-				http.Error(w, "Erreur lors de la génération de l'ID de fichier unique", http.StatusInternalServerError)
-				return
-			}
-			filePath := filepath.Join("databases/upload_image", fileID+ext)
-			outFile, err := os.Create(filePath)
-			if err != nil {
-				http.Error(w, "Erreur lors de la création du fichier ", http.StatusInternalServerError)
-				return
-			}
-			defer outFile.Close()
+				ext := filepath.Ext(fileHeader.Filename)
+				allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
+				if !allowedExts[ext] {
+					http.Error(w, "Extension de fichier non autorisée", http.StatusBadRequest)
+					return
+				}
 
-			_, err = io.Copy(outFile, file)
-			if err != nil {
-				http.Error(w, "Erreur lors de la copie des données du fichier", http.StatusInternalServerError)
-				return
-			}
+				fileSize := fileHeader.Size
+				var maxFileSize int64 = 20 * 1024 * 1024
+				if fileSize > maxFileSize {
+					http.Error(w, "Image trop grande (max 20 Mo)", http.StatusBadRequest)
+					return
+				}
 
-			p.ImageURL = uploadPath + "/" + fileID + ext
+				fileID, err := generateUniqueFilename(uploadPath, ext)
+				if err != nil {
+					http.Error(w, "Erreur lors de la génération de l'ID de fichier unique", http.StatusInternalServerError)
+					return
+				}
+
+				filePath := filepath.Join("databases/upload_image", fileID+ext)
+				outFile, err := os.Create(filePath)
+				if err != nil {
+					http.Error(w, "Erreur lors de la création du fichier ", http.StatusInternalServerError)
+					return
+				}
+				defer outFile.Close()
+
+				_, err = io.Copy(outFile, file)
+				if err != nil {
+					http.Error(w, "Erreur lors de la copie des données du fichier", http.StatusInternalServerError)
+					return
+				}
+
+				p.ImageURL = uploadPath + "/" + fileID + ext
+			}
 
 			err = insertPost(db, p.User, p.Text, p.Title, p.ImageURL)
 			if err != nil {
