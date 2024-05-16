@@ -2,7 +2,6 @@ package forum
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -83,20 +82,17 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	var t *template.Template
-	var categories []Category
 	switch r.URL.Path {
 	case "/post":
-
 		id := r.URL.Query().Get("id")
 		if id != "" {
 			post, err := GetPostByID(db, id)
 			if err != nil {
-				http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
+				http.Error(w, "Erreur lors de la récupération du post", http.StatusInternalServerError)
 				return
 			}
-			t, _ := template.ParseFiles("src/html/post.html")
+			t, _ = template.ParseFiles("src/html/post.html")
 			t.Execute(w, post)
-			fmt.Println(post)
 			return
 		}
 
@@ -115,24 +111,8 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			defer file.Close()
-
-			rows, err := db.Query("SELECT id, name, description FROM category")
 			if err != nil {
 				http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
-				return
-			}
-			defer rows.Close()
-
-			for rows.Next() {
-				var category Category
-				if err := rows.Scan(&category.ID, &category.Name, &category.Description); err != nil {
-					http.Error(w, "Erreur lors de la lecture des catégories depuis la base de données", http.StatusInternalServerError)
-					return
-				}
-				categories = append(categories, category)
-			}
-			if err := rows.Err(); err != nil {
-				http.Error(w, "Erreur lors de la lecture des catégories depuis la base de données", http.StatusInternalServerError)
 				return
 			}
 
@@ -179,21 +159,25 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			http.Redirect(w, r, "/", http.StatusFound)
-
+			return
 		}
-		t, _ = template.ParseFiles("src/html/create_post.html")
 
+		categories, err := getCategories(db)
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
+			return
+		}
+
+		t, _ = template.ParseFiles("src/html/create_post.html")
+		pp := PostPage{
+			Post:       p,
+			Categories: categories,
+		}
+		t.Execute(w, pp)
 	default:
 		http.NotFound(w, r)
 		return
 	}
-
-	pp := PostPage{
-		Post:       p,
-		Categories: categories,
-	}
-
-	t.Execute(w, pp)
 }
 
 func generateUniqueFilename(uploadPath string, ext string) (string, error) {
@@ -204,4 +188,26 @@ func generateUniqueFilename(uploadPath string, ext string) (string, error) {
 			return fileID, nil
 		}
 	}
+}
+
+func getCategories(db *sql.DB) ([]Category, error) {
+	rows, err := db.Query("SELECT id, name, description FROM category")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []Category
+	for rows.Next() {
+		var category Category
+		if err := rows.Scan(&category.ID, &category.Name, &category.Description); err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }
