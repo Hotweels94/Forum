@@ -73,8 +73,13 @@ func (ch Category) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		t, _ := template.ParseFiles("src/html/category.html")
 		t.Execute(w, nil)
 	case "/list_category":
+		categories, err := getCategories(db)
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
+			return
+		}
 		t, _ := template.ParseFiles("src/html/list_category.html")
-		t.Execute(w, ch)
+		t.Execute(w, categories)
 	default:
 		http.NotFound(w, r)
 		return

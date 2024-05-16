@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Voici les Catégories présentes sur le site !</h1>
-    {{range .Categories}}
+    {{range .}}
         <button id={{.ID}}>{{.Name}}</button>
     {{end}}
 </body>
