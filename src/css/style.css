@@ -111,3 +111,58 @@ nav .Login_Register .register_button{
     margin-right: 10px;
     color: #fff;
 }
+
+/*create post */
+
+.create-post-page {
+    background-color: #141414;
+    color: #fff;
+    padding: 20px 80px;
+}
+
+.create-post-page h1 {
+    text-align: center;
+}
+
+.create-post-page form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #1f1f1f;
+}
+
+.create-post-page label {
+    font-weight: bold;
+    color: #fff;
+}
+
+.create-post-page input[type="text"],
+.create-post-page select,
+.create-post-page textarea,
+.create-post-page input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #1f1f1f;
+    color: #fff;
+}
+
+.create-post-page input[type="submit"] {
+    background-color: crimson;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.create-post-page input[type="submit"]:hover {
+    background-color: #dc143c;
+}
