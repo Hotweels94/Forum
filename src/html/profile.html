@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body>
-    {{if .IsConnected}}
-        <h1>Vous etes co</h1>
+    {{if .Username}}
+        <h1>Vous etes connecté {{.Username}}</h1>
+        <h2>Votre email : {{.Email}}</h2>
     {{else}}
         <h1>Vous n'etes pas co</h1>
     {{end}}

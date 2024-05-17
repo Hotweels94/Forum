@@ -12,10 +12,9 @@ import (
 )
 
 type user struct {
-	Email       string
-	Username    string
-	Password    string
-	IsConnected bool
+	Email    string
+	Username string
+	Password string
 }
 
 func initDB() (*sql.DB, error) {
@@ -95,9 +94,11 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			u.Password = r.FormValue("password")
 
 			if verifyLog(db, u.Username, u.Email, u.Password) {
-				u.IsConnected = true
+
+				CreateCookie(w, "username", u.Username)
+				CreateCookie(w, "email", u.Email)
+
 				http.Redirect(w, r, "/profile", http.StatusFound)
-				fmt.Println(u.IsConnected)
 				return
 			}
 		}
@@ -105,9 +106,34 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == "/profile" {
+		u.Username, _ = getCookie(r, "username")
+		u.Email, _ = getCookie(r, "email")
+		fmt.Println(u.Username + "/" + u.Email)
+
 		t, _ = template.ParseFiles("src/html/profile.html")
+
 	}
 
 	t.Execute(w, u)
 
+}
+
+func CreateCookie(w http.ResponseWriter, name string, value string) {
+	cookie := &http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		MaxAge:   120,
+		HttpOnly: true,
+		Secure:   true,
+	}
+	http.SetCookie(w, cookie)
+}
+
+func getCookie(r *http.Request, name string) (string, error) {
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, err
 }
