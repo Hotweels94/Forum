@@ -47,7 +47,11 @@ func insertUser(db *sql.DB, email string, username string, password string) erro
 
 	_, err = db.Exec("INSERT INTO users (email, username, password) VALUES(?, ?, ?)", email, username, hashedPassword)
 	if err != nil {
-		fmt.Println(err)
+		if strings.Contains(err.Error(), "UNIQUE") {
+			fmt.Println("Username ou Email déjà connu.")
+		} else {
+			fmt.Println(err)
+		}
 	}
 	return err
 }
