@@ -66,6 +66,14 @@ func verifyLog(db *sql.DB, username string, email string, password string) bool 
 	return err == nil
 }
 
+func modifyLog(db *sql.DB, username string, email string) error {
+	_, err := db.Exec("UPDATE users SET username = ?, email = ? WHERE username = ?", username, email, username)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
 func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDB()
 	if err != nil {
@@ -110,8 +118,24 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		u.Email, _ = getCookie(r, "email")
 		fmt.Println(u.Username + "/" + u.Email)
 
-		t, _ = template.ParseFiles("src/html/profile.html")
+		if r.Method == "POST" {
+			action := r.FormValue("action")
 
+			if action == "Modifier" {
+				u.Username = strings.TrimSpace(r.FormValue("username"))
+				u.Email = strings.TrimSpace(r.FormValue("email"))
+				modifyLog(db, u.Username, u.Email)
+				fmt.Println(u.Email, u.Username)
+			}
+
+			if action == "logout" {
+				DeleteCookie(w, "username")
+				DeleteCookie(w, "email")
+				http.Redirect(w, r, "/login", http.StatusFound)
+			}
+		}
+
+		t, _ = template.ParseFiles("src/html/profile.html")
 	}
 
 	t.Execute(w, u)
@@ -123,7 +147,19 @@ func CreateCookie(w http.ResponseWriter, name string, value string) {
 		Name:     name,
 		Value:    value,
 		Path:     "/",
-		MaxAge:   120,
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+	}
+	http.SetCookie(w, cookie)
+}
+
+func DeleteCookie(w http.ResponseWriter, name string) {
+	cookie := &http.Cookie{
+		Name:     name,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
 		HttpOnly: true,
 		Secure:   true,
 	}
