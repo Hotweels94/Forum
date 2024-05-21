@@ -6,11 +6,11 @@
     <title>Liste des catégories</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body>
+<body class="list-categories-page">
     <div class="list_categories">
         <h1>Voici les Catégories présentes sur le site !</h1>
         {{range .}}
-            <button class="button_categories" id={{.ID}}>{{.Name}}</button>
+            <button class="button_categories" id="{{.ID}}">{{.Name}}</button>
         {{end}}
     </div>
 </body>

@@ -6,12 +6,14 @@
     <title>Profile</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body>
-    {{if .Username}}
-        <h1>Vous etes connecté {{.Username}}</h1>
-        <h2>Votre email : {{.Email}}</h2>
-    {{else}}
-        <h1>Vous n'etes pas co</h1>
-    {{end}}
+<body class="profile-page">
+    <div class="profile_content">
+        {{if .Username}}
+            <h1>Vous êtes connecté {{.Username}}</h1>
+            <h2>Votre email : {{.Email}}</h2>
+        {{else}}
+            <h1>Vous n'êtes pas connecté</h1>
+        {{end}}
+    </div>
 </body>
 </html>
