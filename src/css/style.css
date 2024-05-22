@@ -1,3 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
 /* index */
 .index-page {
     background-color: #141414;
@@ -345,8 +352,43 @@
     cursor: pointer;
     font-size: 16px;
     width: 100%;
+    margin-top: 32px;
 }
 
 .profile_content .logout-button:hover {
+    background-color: #b61031;
+}
+
+.profile_content .modify_profile label{
+    font-weight: bold;
+    color: #fff;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.profile_content .modify_profile input[type="text"]{
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #1f1f1f;
+    color: #fff;
+}
+
+.profile_content .modify_profile .modify_button {
+    background-color: crimson;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.profile_content .modify_profile .modify_button:hover {
     background-color: #b61031;
 }
