@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -13,7 +12,6 @@ import (
 )
 
 type user struct {
-	ID       int
 	Email    string
 	Username string
 	Password string
@@ -68,10 +66,10 @@ func verifyLog(db *sql.DB, username string, email string, password string) bool 
 	return err == nil
 }
 
-func modifyLog(db *sql.DB, id int, username string, email string) error {
-	_, err := db.Exec("UPDATE users SET username = ?, email = ? WHERE id = ?", username, email, id)
+func modifyLog(db *sql.DB, newUsername string, oldUsername string) error {
+	_, err := db.Exec("UPDATE users SET username = ? WHERE username = ?", newUsername, oldUsername)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error updating user:", err)
 	}
 	return err
 }
@@ -118,8 +116,6 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/profile" {
 		u.Username, _ = getCookie(r, "username")
 		u.Email, _ = getCookie(r, "email")
-		idStr, _ := getCookie(r, "id")
-		u.ID, _ = strconv.Atoi(idStr)
 
 		fmt.Println(u.Username + "/" + u.Email)
 
@@ -127,10 +123,14 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			action := r.FormValue("action")
 
 			if action == "Modifier" {
+				oldUsername, _ := getCookie(r, "username")
 				u.Username = strings.TrimSpace(r.FormValue("username"))
 				u.Email = strings.TrimSpace(r.FormValue("email"))
-				modifyLog(db, u.ID, u.Username, u.Email)
-				fmt.Println(u.Email, u.Username)
+				err := modifyLog(db, u.Username, oldUsername)
+				if err == nil {
+					CreateCookie(w, "username", u.Username)
+				}
+
 			}
 
 			if action == "logout" {
