@@ -13,12 +13,12 @@ import (
 )
 
 type Post struct {
+	id               string
 	User             string
 	Text             string
 	Title            string
 	ImageURL         string
 	SelectedCategory int
-	Categories       []Category
 }
 
 type PostPage struct {

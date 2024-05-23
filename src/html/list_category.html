@@ -10,7 +10,9 @@
     <div class="list_categories">
         <h1>Voici les Catégories présentes sur le site !</h1>
         {{range .}}
-            <button class="button_categories" id="{{.ID}}">{{.Name}}</button>
+            <a href="/category?id={{.ID}}" class="category-link">
+                <button class="button_categories" id="{{.ID}}">{{.Name}}</button>
+            </a>
         {{end}}
     </div>
 </body>

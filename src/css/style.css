@@ -392,3 +392,22 @@ body {
 .profile_content .modify_profile .modify_button:hover {
     background-color: #b61031;
 }
+
+/* Liste des posts */
+.list-post-page {
+    background-color: #141414;
+    color: #fff;
+    padding: 20px 80px;
+}
+
+.list_post h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.post-link {
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+}
+

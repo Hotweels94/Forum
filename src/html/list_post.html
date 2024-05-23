@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des posts de {{.NameCategory}}</title>
+    <link rel="stylesheet" href="/src/css/style.css">
+</head>
+<body class="list-post-page">
+    <div class="list_post">
+        <h1>Voici les Posts de {{.NameCategory}}</h1>
+        {{range .Posts}}
+            <div class="post">
+                <h2>{{.Title}}</h2>
+                <p><strong>Utilisateur:</strong> {{.User}}</p>
+                <p>{{.Text}}</p>
+                {{if .ImageURL}}
+                    <img src="{{.ImageURL}}" alt="">
+                {{end}}
+            </div>
+        {{end}}
+    </div>
+</body>
+</html>
