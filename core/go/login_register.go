@@ -66,8 +66,16 @@ func verifyLog(db *sql.DB, username string, email string, password string) bool 
 	return err == nil
 }
 
-func modifyLog(db *sql.DB, newUsername string, oldUsername string) error {
+func modifyUsername(db *sql.DB, newUsername string, oldUsername string) error {
 	_, err := db.Exec("UPDATE users SET username = ? WHERE username = ?", newUsername, oldUsername)
+	if err != nil {
+		fmt.Println("Error updating user:", err)
+	}
+	return err
+}
+
+func modifyEmail(db *sql.DB, newEmail string, oldEmail string) error {
+	_, err := db.Exec("UPDATE users SET email = ? WHERE email = ?", newEmail, oldEmail)
 	if err != nil {
 		fmt.Println("Error updating user:", err)
 	}
@@ -122,15 +130,21 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			action := r.FormValue("action")
 
-			if action == "Modifier" {
+			if action == "Modifier votre pseudo" {
 				oldUsername, _ := getCookie(r, "username")
 				u.Username = strings.TrimSpace(r.FormValue("username"))
-				u.Email = strings.TrimSpace(r.FormValue("email"))
-				err := modifyLog(db, u.Username, oldUsername)
+				err := modifyUsername(db, u.Username, oldUsername)
 				if err == nil {
 					CreateCookie(w, "username", u.Username)
 				}
-
+			}
+			if action == "Modifier votre email" {
+				oldEmail, _ := getCookie(r, "email")
+				u.Email = strings.TrimSpace(r.FormValue("email"))
+				err := modifyEmail(db, u.Email, oldEmail)
+				if err == nil {
+					CreateCookie(w, "email", u.Email)
+				}
 			}
 
 			if action == "logout" {
