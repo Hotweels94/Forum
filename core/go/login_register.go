@@ -129,7 +129,6 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "POST" {
 			action := r.FormValue("action")
-
 			if action == "Modifier votre pseudo" {
 				oldUsername, _ := getCookie(r, "username")
 				u.Username = strings.TrimSpace(r.FormValue("username"))
