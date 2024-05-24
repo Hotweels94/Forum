@@ -6,12 +6,14 @@
     <title>{{.Title}}</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body>
-    <h2>{{.Title}}</h2>
-    <h2>Post de : {{.User}}</h2>
-    <p>{{.Text}}</p>
-    {{if .ImageURL}}
-        <img src ="{{.ImageURL}}" alt ="Image">
-    {{end}}
+<body class="post-detail-page">
+    <div class="post-detail">
+        <h2>{{.Title}}</h2>
+        <h3>Post de : {{.User}}</h3>
+        <p>{{.Text}}</p>
+        {{if .ImageURL}}
+            <img src="{{.ImageURL}}" alt="Image">
+        {{end}}
+    </div>
 </body>
 </html>

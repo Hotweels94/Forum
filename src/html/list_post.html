@@ -10,14 +10,16 @@
     <div class="list_post">
         <h1>Voici les Posts de {{.NameCategory}}</h1>
         {{range .Posts}}
-            <div class="post">
-                <h2>{{.Title}}</h2>
-                <p><strong>Utilisateur:</strong> {{.User}}</p>
-                <p>{{.Text}}</p>
-                {{if .ImageURL}}
-                    <img src="{{.ImageURL}}" alt="">
-                {{end}}
-            </div>
+            <a href="/post?id={{.ID}}" class="post-link">
+                <div class="post">
+                    <h2>{{.Title}}</h2>
+                    <p><strong>Utilisateur:</strong> {{.User}}</p>
+                    <p>{{.Text}}</p>
+                    {{if .ImageURL}}
+                        <img src="{{.ImageURL}}" alt="">
+                    {{end}}
+                </div>
+            </a>
         {{end}}
     </div>
 </body>

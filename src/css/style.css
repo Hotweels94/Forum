@@ -399,6 +399,7 @@ body {
     background-color: #141414;
     color: #fff;
     padding: 20px 80px;
+    font-family: 'YourCustomFont', sans-serif;
 }
 
 .list_post h1 {
@@ -410,5 +411,71 @@ body {
     text-decoration: none;
     display: block;
     margin-bottom: 10px;
+    transition: background-color 0.3s ease;
 }
 
+.post-link .post {
+    padding: 20px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #1f1f1f;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.post-link .post:hover {
+    background-color: crimson;
+}
+
+.post-link .post h2 {
+    margin-top: 0;
+}
+
+.post-link .post p {
+    margin: 10px 0;
+}
+
+.post-link .post img {
+    max-width: 100%;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Détail du post */
+.post-detail-page {
+    background-color: #141414;
+    color: #fff;
+    padding: 20px 80px;
+}
+
+.post-detail {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #1f1f1f;
+}
+
+.post-detail h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.post-detail h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.post-detail p {
+    margin: 20px 0;
+}
+
+.post-detail img {
+    max-width: 100%;
+    border-radius: 5px;
+    display: block;
+    margin: 20px auto;
+}

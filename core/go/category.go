@@ -135,7 +135,7 @@ func GetListPostByCategoryID(db *sql.DB, categoryID int) (list_Post, error) {
 
 	for rows.Next() {
 		var post Post
-		err := rows.Scan(&post.id, &post.User, &post.Text, &post.Title, &post.ImageURL, &post.SelectedCategory)
+		err := rows.Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL, &post.SelectedCategory)
 		if err != nil {
 			return listPost, err
 		}

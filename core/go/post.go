@@ -13,7 +13,7 @@ import (
 )
 
 type Post struct {
-	id               string
+	ID               string
 	User             string
 	Text             string
 	Title            string
