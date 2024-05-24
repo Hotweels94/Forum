@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gofrs/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,6 +17,9 @@ type user struct {
 	Username string
 	Password string
 }
+
+var userSessions = make(map[string]user)
+var userInfo user
 
 func initDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./databases/forum.db")
@@ -55,15 +59,33 @@ func insertUser(db *sql.DB, email string, username string, password string) erro
 	return err
 }
 
-func verifyLog(db *sql.DB, username string, email string, password string) bool {
+func verifyLog(db *sql.DB, username string, email string, password string) (user, error) {
 	var hashedPassword string
-	err := db.QueryRow("SELECT password FROM users WHERE username = ? OR email = ?", username, email).Scan(&hashedPassword)
+	var userData user
+	err := db.QueryRow("SELECT password, username, email FROM users WHERE username = ? OR email = ?", username, email).Scan(&hashedPassword, &userData.Username, &userData.Email)
 	if err != nil {
-		return false
+		return userData, err
 	}
-
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	return err == nil
+	return userData, err
+}
+
+func getUsername(db *sql.DB, username string) string {
+	var userData user
+	err := db.QueryRow("SELECT username FROM users WHERE username = ?", username).Scan(&userData.Username)
+	if err != nil {
+		return ""
+	}
+	return userData.Username
+}
+
+func getEmail(db *sql.DB, email string) string {
+	var userData user
+	err := db.QueryRow("SELECT email FROM users WHERE email = ?", email).Scan(&userData.Email)
+	if err != nil {
+		return ""
+	}
+	return userData.Email
 }
 
 func modifyUsername(db *sql.DB, newUsername string, oldUsername string) error {
@@ -109,10 +131,16 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			u.Email = strings.TrimSpace(r.FormValue("username or email"))
 			u.Password = r.FormValue("password")
 
-			if verifyLog(db, u.Username, u.Email, u.Password) {
+			userData, isConnected := verifyLog(db, u.Username, u.Email, u.Password)
+			if isConnected == nil {
+				sessionToken, _ := uuid.NewV4()
 
-				CreateCookie(w, "username", u.Username)
-				CreateCookie(w, "email", u.Email)
+				userSessions[sessionToken.String()] = user{
+					Username: userData.Username,
+					Email:    userData.Email,
+				}
+
+				CreateCookie(w, "session_token", sessionToken.String())
 
 				http.Redirect(w, r, "/profile", http.StatusFound)
 				return
@@ -122,42 +150,57 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == "/profile" {
-		u.Username, _ = getCookie(r, "username")
-		u.Email, _ = getCookie(r, "email")
+		cookie, err := getCookie(r, "session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				// If the cookie is not set, return an unauthorized status
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Println(err)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Println(err)
+			return
+		}
+		sessionToken := cookie
 
-		fmt.Println(u.Username + "/" + u.Email)
+		userSession, exists := userSessions[sessionToken]
+		if !exists {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		userInfo = userSession
 
 		if r.Method == "POST" {
 			action := r.FormValue("action")
+
 			if action == "Modifier votre pseudo" {
-				oldUsername, _ := getCookie(r, "username")
-				u.Username = strings.TrimSpace(r.FormValue("username"))
-				err := modifyUsername(db, u.Username, oldUsername)
-				if err == nil {
-					CreateCookie(w, "username", u.Username)
+				oldUsername := getUsername(db, userInfo.Username)
+				fmt.Println(oldUsername)
+				userInfo.Username = strings.TrimSpace(r.FormValue("username"))
+				err := modifyUsername(db, userInfo.Username, oldUsername)
+				if err != nil {
+					fmt.Println(err)
 				}
 			}
 			if action == "Modifier votre email" {
-				oldEmail, _ := getCookie(r, "email")
-				u.Email = strings.TrimSpace(r.FormValue("email"))
-				err := modifyEmail(db, u.Email, oldEmail)
-				if err == nil {
-					CreateCookie(w, "email", u.Email)
+				oldEmail := getEmail(db, userInfo.Email)
+				userInfo.Email = strings.TrimSpace(r.FormValue("email"))
+				err := modifyEmail(db, userInfo.Email, oldEmail)
+				if err != nil {
+					fmt.Println(err)
 				}
 			}
 
 			if action == "logout" {
-				DeleteCookie(w, "username")
-				DeleteCookie(w, "email")
+				DeleteCookie(w, "session_token")
 				http.Redirect(w, r, "/login", http.StatusFound)
 			}
 		}
-
 		t, _ = template.ParseFiles("src/html/profile.html")
 	}
-
-	t.Execute(w, u)
-
+	t.Execute(w, userInfo)
 }
 
 func CreateCookie(w http.ResponseWriter, name string, value string) {
@@ -165,7 +208,7 @@ func CreateCookie(w http.ResponseWriter, name string, value string) {
 		Name:     name,
 		Value:    value,
 		Path:     "/",
-		MaxAge:   3600,
+		MaxAge:   86400,
 		HttpOnly: true,
 		Secure:   true,
 	}
