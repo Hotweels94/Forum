@@ -15,5 +15,32 @@
             <img src="{{.ImageURL}}" alt="Image">
         {{end}}
     </div>
+
+    <div class="comments">
+        <h3>Commentaires</h3>
+        {{range .Comments}}
+            <div class="comment">
+                <h4>{{.User}}</h4>
+                <p>{{.Text}}</p>
+            </div>
+        {{end}}
+
+        <div class="comment-form">
+            <h3>Ajouter un commentaire</h3>
+            <form action="/submit_comment" method="POST">
+                <input type="hidden" name="postId" value="{{.PostID}}">
+                <div>
+                    <label for="username">Nom:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div>
+                    <label for="comment">Commentaire:</label>
+                    <textarea id="comment" name="comment" rows="4" required></textarea>
+                </div>
+                <div>
+                    <button type="submit">Soumettre</button>
+                </div>
+            </form>
+        </div>
 </body>
 </html>
