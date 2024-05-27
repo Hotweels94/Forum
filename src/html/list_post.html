@@ -10,7 +10,7 @@
     <div class="list_post">
         <h1>Voici les Posts de {{.NameCategory}}</h1>
         {{range .Posts}}
-            <a href="/post?id={{.ID}}" class="post-link">
+            <a href="/category/post?id={{.ID}}" class="post-link">
                 <div class="post">
                     <h2>{{.Title}}</h2>
                     <p><strong>Utilisateur:</strong> {{.User}}</p>
