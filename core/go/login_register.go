@@ -13,9 +13,10 @@ import (
 )
 
 type user struct {
-	Email    string
-	Username string
-	Password string
+	Email       string
+	Username    string
+	Password    string
+	IsConnected bool
 }
 
 var userSessions = make(map[string]user)
@@ -198,6 +199,7 @@ func (u user) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "/login", http.StatusFound)
 			}
 		}
+		userInfo = verifyCookie(r, cookie, userInfo)
 		t, _ = template.ParseFiles("src/html/profile.html")
 	}
 	t.Execute(w, userInfo)
@@ -233,4 +235,16 @@ func getCookie(r *http.Request, name string) (string, error) {
 		return "", err
 	}
 	return cookie.Value, err
+}
+
+func verifyCookie(r *http.Request, cookies string, userInfo user) user {
+	cookie, _ := getCookie(r, "session_token")
+	if len(cookie) == 0 {
+		userInfo.IsConnected = false
+		return user{}
+	} else {
+		userInfo.IsConnected = true
+		fmt.Println(userInfo.IsConnected)
+		return userInfo
+	}
 }
