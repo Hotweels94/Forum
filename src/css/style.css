@@ -438,9 +438,11 @@ body {
 }
 
 .post-link .post img {
-    max-width: 100%;
-    border-radius: 5px;
-    margin-top: 10px;
+    max-width: 25%;
+    max-height: 25%;
+    border-radius: 25px;
+    display: block;
+    margin: 20px auto;
 }
 
 /* Détail du post */
