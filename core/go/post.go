@@ -2,6 +2,8 @@ package forum
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -26,6 +28,18 @@ type PostPage struct {
 	Categories []Category
 }
 
+type Comment struct {
+	ID     string
+	PostID string
+	User   string
+	Text   string
+}
+
+type PostWithComments struct {
+	Post     Post
+	Comments []Comment
+}
+
 func initDBPost() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./databases/forum.db")
 	if err != nil {
@@ -47,7 +61,25 @@ func initDBPost() (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = initDBComment(db)
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
+}
+
+func initDBComment(db *sql.DB) error {
+	_, err := db.Exec(`
+        CREATE TABLE IF NOT EXISTS comment (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id TEXT NOT NULL,
+            user TEXT NOT NULL,
+            text TEXT NOT NULL,
+            FOREIGN KEY (post_id) REFERENCES post(id)
+        )
+    `)
+	return err
 }
 
 func insertPost(db *sql.DB, user string, text string, title string, imageURL string, categoryID int) error {
@@ -66,24 +98,54 @@ func insertPost(db *sql.DB, user string, text string, title string, imageURL str
 
 func GetPostByID(db *sql.DB, id string) (Post, error) {
 	var post Post
-	err := db.QueryRow("SELECT user, text, title, imageURL FROM post WHERE id = ?", id).Scan(&post.User, &post.Text, &post.Title, &post.ImageURL)
+	err := db.QueryRow("SELECT id, user, text, title, imageURL FROM post WHERE id = ?", id).Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL)
 	if err != nil {
 		return Post{}, err
 	}
 	return post, nil
 }
 
+func insertComment(db *sql.DB, postID, user, text string) error {
+	_, err := db.Exec("INSERT INTO comment (post_id, user, text) VALUES (?, ?, ?)", postID, user, text)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
+	rows, err := db.Query("SELECT id, post_id, user, text FROM comment WHERE post_id = ?", postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.User, &comment.Text); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
+}
+
 const uploadPath = "/databases/upload_image"
 
 func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBPost()
-	if err != nil {
+	err2 := initDBComment(db)
+	if err != nil || err2 != nil {
 		http.Error(w, "Erreur lors de la connexion à la base de données", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
 
-	var t *template.Template
 	switch r.URL.Path {
 	case "/post":
 		id := r.URL.Query().Get("id")
@@ -93,8 +155,25 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de la récupération du post", http.StatusInternalServerError)
 				return
 			}
-			t, _ = template.ParseFiles("src/html/post.html")
-			t.Execute(w, post)
+
+			if r.Method == "POST" {
+				text := r.FormValue("comment")
+				user := "testUser"
+				err := insertComment(db, id, user, text)
+				if err != nil {
+					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
+					fmt.Println(err)
+					return
+				}
+
+			}
+			comments, err := getCommentsByPostID(db, id)
+			if err != nil {
+				http.Error(w, "Erreur lors de la récupération des commentaires", http.StatusInternalServerError)
+				return
+			}
+			t, _ := template.ParseFiles("src/html/post.html")
+			t.Execute(w, PostWithComments{Post: post, Comments: comments})
 			return
 		}
 
@@ -173,7 +252,7 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		t, _ = template.ParseFiles("src/html/create_post.html")
+		t, _ := template.ParseFiles("src/html/create_post.html")
 		pp := PostPage{
 			Post:       p,
 			Categories: categories,
@@ -181,18 +260,23 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		t.Execute(w, pp)
 	default:
 		http.NotFound(w, r)
-		return
 	}
 }
 
 func generateUniqueFilename(uploadPath string, ext string) (string, error) {
-	for {
-		fileID := uuid.Must(uuid.NewV4()).String()
-		filePath := filepath.Join(uploadPath, fileID+ext)
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-			return fileID, nil
+	for i := 0; i < 100; i++ {
+		id, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+
+		filePath := filepath.Join(uploadPath, id.String()+ext)
+		_, err = os.Stat(filePath)
+		if os.IsNotExist(err) {
+			return id.String(), nil
 		}
 	}
+	return "", errors.New("failed to generate unique filename")
 }
 
 func getCategories(db *sql.DB) ([]Category, error) {
