@@ -38,12 +38,12 @@ func HandleForum() {
 
 	http.Handle("/", new(mainInfo))
 	http.Handle("/test", new(web))
-	http.Handle("/register", new(user))
-	http.Handle("/login", new(user))
-	http.Handle("/profile", new(user))
-	http.Handle("/post", new(Post))
-	http.Handle("/category", new(Category))
-	http.Handle("/list_category", new(Category))
+	http.Handle("/register", new(Register))
+	http.Handle("/login", new(Login))
+	http.Handle("/profile", new(Profil))
+	http.Handle("/post", new(Posts))
+	http.Handle("/category", new(Categories))
+	http.Handle("/list_category", new(Categories))
 	http.Handle("/list_post", new(list_Post))
 	http.ListenAndServe(":8080", nil)
 }

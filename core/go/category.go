@@ -3,15 +3,14 @@ package forum
 import (
 	"database/sql"
 	"fmt"
+	"forum/core/structs"
 	"html/template"
 	"net/http"
 	"strconv"
 )
 
-type Category struct {
-	ID          int
-	Name        string
-	Description string
+type Categories struct {
+	category structs.Category
 }
 
 func initDBCategory() (*sql.DB, error) {
@@ -44,7 +43,7 @@ func insertCategory(db *sql.DB, name string, description string) error {
 	return nil
 }
 
-func (ch Category) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ch Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBCategory()
 	if err != nil {
 		http.Error(w, "Erreur de connexion à la base de données", http.StatusInternalServerError)
@@ -102,7 +101,7 @@ func (ch Category) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type list_Post struct {
-	Posts        []Post
+	Posts        []structs.Post
 	NameCategory string
 }
 
@@ -134,7 +133,7 @@ func GetListPostByCategoryID(db *sql.DB, categoryID int) (list_Post, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var post Post
+		var post structs.Post
 		err := rows.Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL, &post.SelectedCategory)
 		if err != nil {
 			return listPost, err

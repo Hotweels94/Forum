@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"forum/core/structs"
 	"html/template"
 	"io"
 	"net/http"
@@ -14,30 +15,8 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type Post struct {
-	ID               string
-	User             string
-	Text             string
-	Title            string
-	ImageURL         string
-	SelectedCategory int
-}
-
-type PostPage struct {
-	Post       Post
-	Categories []Category
-}
-
-type Comment struct {
-	ID     string
-	PostID string
-	User   string
-	Text   string
-}
-
-type PostWithComments struct {
-	Post     Post
-	Comments []Comment
+type Posts struct {
+	post structs.Post
 }
 
 func initDBPost() (*sql.DB, error) {
@@ -96,11 +75,11 @@ func insertPost(db *sql.DB, user string, text string, title string, imageURL str
 	return nil
 }
 
-func GetPostByID(db *sql.DB, id string) (Post, error) {
-	var post Post
+func GetPostByID(db *sql.DB, id string) (structs.Post, error) {
+	var post structs.Post
 	err := db.QueryRow("SELECT id, user, text, title, imageURL FROM post WHERE id = ?", id).Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL)
 	if err != nil {
-		return Post{}, err
+		return structs.Post{}, err
 	}
 	return post, nil
 }
@@ -113,16 +92,16 @@ func insertComment(db *sql.DB, postID, user, text string) error {
 	return nil
 }
 
-func getCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
+func getCommentsByPostID(db *sql.DB, postID string) ([]structs.Comment, error) {
 	rows, err := db.Query("SELECT id, post_id, user, text FROM comment WHERE post_id = ?", postID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var comments []Comment
+	var comments []structs.Comment
 	for rows.Next() {
-		var comment Comment
+		var comment structs.Comment
 		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.User, &comment.Text); err != nil {
 			return nil, err
 		}
@@ -137,7 +116,7 @@ func getCommentsByPostID(db *sql.DB, postID string) ([]Comment, error) {
 
 const uploadPath = "/databases/upload_image"
 
-func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBPost()
 	err2 := initDBComment(db)
 	if err != nil || err2 != nil {
@@ -173,7 +152,7 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			t, _ := template.ParseFiles("src/html/post.html")
-			t.Execute(w, PostWithComments{Post: post, Comments: comments})
+			t.Execute(w, structs.PostWithComments{Post: post, Comments: comments})
 			return
 		}
 
@@ -183,8 +162,8 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
 				return
 			}
-			p.Title = r.FormValue("title")
-			p.Text = r.FormValue("content")
+			p.post.Title = r.FormValue("title")
+			p.post.Text = r.FormValue("content")
 			categoryIDStr := r.FormValue("category")
 			categoryID, err := strconv.Atoi(categoryIDStr)
 			if err != nil {
@@ -234,9 +213,9 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				p.ImageURL = uploadPath + "/" + fileID + ext
+				p.post.ImageURL = uploadPath + "/" + fileID + ext
 			}
-			err = insertPost(db, p.User, p.Text, p.Title, p.ImageURL, categoryID)
+			err = insertPost(db, p.post.User, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
 			if err != nil {
 				http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
 				return
@@ -252,10 +231,15 @@ func (p Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		var convertedCategories []structs.Category
+		for _, c := range categories {
+			convertedCategories = append(convertedCategories, structs.Category(c))
+		}
+
 		t, _ := template.ParseFiles("src/html/create_post.html")
-		pp := PostPage{
-			Post:       p,
-			Categories: categories,
+		pp := structs.PostPage{
+			Post:       p.post,
+			Categories: convertedCategories,
 		}
 		t.Execute(w, pp)
 	default:
@@ -279,16 +263,16 @@ func generateUniqueFilename(uploadPath string, ext string) (string, error) {
 	return "", errors.New("failed to generate unique filename")
 }
 
-func getCategories(db *sql.DB) ([]Category, error) {
+func getCategories(db *sql.DB) ([]structs.Category, error) {
 	rows, err := db.Query("SELECT id, name, description FROM category")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var categories []Category
+	var categories []structs.Category
 	for rows.Next() {
-		var category Category
+		var category structs.Category
 		if err := rows.Scan(&category.ID, &category.Name, &category.Description); err != nil {
 			return nil, err
 		}

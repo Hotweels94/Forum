@@ -8,28 +8,24 @@
 </head>
 <body class="profile-page">
     <div class="profile_content">
-        {{if .IsConnected}}
-            <h1>Vous êtes connecté {{.Username}}</h1>
-            <h2>Votre email : {{.Email}}</h2>
+        <h1>Vous êtes connecté {{.User.Username}}</h1>
+        <h2>Votre email : {{.User.Email}}</h2>
 
-            <div class="modify_profile">
-                <form action="/profile" method="POST">
-                    <h3>Modification d'informations :</h3>
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username"><br>
-                    <input class="modify_button" type="submit" name="action" value="Modifier votre pseudo">
-                    <label for="email">Email:</label>
-                    <input type="text" id="email" name="email"><br>
-                    <input class="modify_button" type="submit" name="action" value="Modifier votre email">
-                </form>
-            </div>
-
-            <form action ="/profile" method="POST">
-                <button class ="logout-button" type="submit" name="action" value="logout">Déconnexion</button>
+        <div class="modify_profile">
+            <form action="/profile" method="POST">
+                <h3>Modification d'informations :</h3>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username"><br>
+                <input class="modify_button" type="submit" name="action" value="Modifier votre pseudo">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email"><br>
+                <input class="modify_button" type="submit" name="action" value="Modifier votre email">
             </form>
-        {{else}}
-            <h1>Vous n'êtes pas connecté</h1>
-        {{end}}
+        </div>
+
+        <form action ="/profile" method="POST">
+            <button class ="logout-button" type="submit" name="action" value="logout">Déconnexion</button>
+        </form>
     </div>
 </body>
 </html>
