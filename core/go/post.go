@@ -16,7 +16,9 @@ import (
 )
 
 type Posts struct {
-	post structs.Post
+	post        structs.Post
+	User        structs.User
+	IsConnected bool
 }
 
 func initDBPost() (*sql.DB, error) {
@@ -124,6 +126,13 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+
+	if verifyCookie(r) {
+		p.IsConnected = true
+		p.User = userSession
+	} else {
+		p.IsConnected = false
+	}
 
 	switch r.URL.Path {
 	case "/post":

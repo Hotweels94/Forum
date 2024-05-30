@@ -15,8 +15,12 @@
                 <a href="/post">Créer un post</a>
             </div>
             <div class="login-register">
-                <a href="/login"><button class="login_button_index">Login</button></a>
-                <a href="/register"><button class="register_button_index">Register</button></a>
+                {{if .IsConnected}}
+                    <a href="/profile"><button class="profile_button_index">{{.User.Username}}</button></a>
+                {{else}}
+                    <a href="/login"><button class="login_button_index">Login</button></a>
+                    <a href="/register"><button class="register_button_index">Register</button></a>
+                {{end}}
             </div>
         </nav>
         <!-- Fin Barre haut de page -->

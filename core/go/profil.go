@@ -12,6 +12,9 @@ type Profil struct {
 	User structs.User
 }
 
+var userSession structs.User
+var exists bool
+
 func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDB()
 	if err != nil {
@@ -38,7 +41,7 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			sessionToken := cookie
 
-			userSession, exists := userSessions[sessionToken]
+			userSession, exists = userSessions[sessionToken]
 			if !exists {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
@@ -51,7 +54,6 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 				if action == "Modifier votre pseudo" {
 					oldUsername := getUsername(db, p.User.Username)
-					fmt.Println(oldUsername)
 					p.User.Username = strings.TrimSpace(r.FormValue("username"))
 					err := modifyUsername(db, p.User.Username, oldUsername)
 					if err != nil {

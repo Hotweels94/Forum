@@ -2,6 +2,7 @@ package forum
 
 import (
 	"fmt"
+	"forum/core/structs"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -12,6 +13,8 @@ import (
 type mainInfo struct {
 	PageName      string
 	NumberOfVisit int
+	User          structs.User
+	IsConnected   bool
 }
 
 type web struct {
@@ -24,6 +27,20 @@ func (web *web) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	db, err := initDB()
+	if err != nil {
+		return
+	}
+	defer db.Close()
+
+	if verifyCookie(r) {
+		m.IsConnected = true
+		m.User = userSession
+	} else {
+		m.IsConnected = false
+	}
+
 	m.NumberOfVisit++
 	m.PageName = "Il y a " + strconv.Itoa(m.NumberOfVisit) + " visites !!"
 	t, _ := template.ParseFiles("src/html/index.html")

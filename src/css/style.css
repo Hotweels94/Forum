@@ -63,6 +63,21 @@ body {
     background-color: #b61031;
 }
 
+.navbar .profile_button_index {
+    background-color: inherit;
+    color: #8f8f8f;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+
+}
+.navbar .login_button_index:hover {
+    background-color: #5a5a5a;
+}
+
 .index-page h1 {
     text-align: center;
     margin-bottom: 20px;
