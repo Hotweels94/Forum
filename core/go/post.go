@@ -127,13 +127,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	if verifyCookie(r) {
-		p.IsConnected = true
-		p.User = userSession
-	} else {
-		p.IsConnected = false
-	}
-
 	switch r.URL.Path {
 	case "/post":
 		id := r.URL.Query().Get("id")
@@ -171,12 +164,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
-			if verifyCookie(r) {
-				p.IsConnected = true
-				p.User = userSession
-			} else {
-				p.IsConnected = false
-			}
 			err := r.ParseMultipartForm(20 << 20)
 			if err != nil {
 				http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
@@ -258,8 +245,17 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		t, _ := template.ParseFiles("src/html/create_post.html")
 		pp := structs.PostPage{
-			Post:       p.post,
-			Categories: convertedCategories,
+			Post:        p.post,
+			Categories:  convertedCategories,
+			User:        p.User,
+			IsConnected: p.IsConnected,
+		}
+		if verifyCookie(r) {
+			pp.IsConnected = true
+			pp.User = userSession
+			fmt.Println(pp.User.Username)
+		} else {
+			pp.IsConnected = false
 		}
 		t.Execute(w, pp)
 	default:

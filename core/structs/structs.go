@@ -17,8 +17,10 @@ type Post struct {
 }
 
 type PostPage struct {
-	Post       Post
-	Categories []Category
+	Post        Post
+	Categories  []Category
+	User        User
+	IsConnected bool
 }
 
 type Comment struct {
