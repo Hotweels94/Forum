@@ -146,8 +146,13 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			if r.Method == "POST" {
 				text := r.FormValue("comment")
-				user := "testUser"
-				err := insertComment(db, id, user, text)
+				if verifyCookie(r) {
+					p.IsConnected = true
+					p.User = userSession
+				} else {
+					p.IsConnected = false
+				}
+				err := insertComment(db, id, p.User.Username, text)
 				if err != nil {
 					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
 					fmt.Println(err)
@@ -166,6 +171,12 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
+			if verifyCookie(r) {
+				p.IsConnected = true
+				p.User = userSession
+			} else {
+				p.IsConnected = false
+			}
 			err := r.ParseMultipartForm(20 << 20)
 			if err != nil {
 				http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
@@ -224,7 +235,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 				p.post.ImageURL = uploadPath + "/" + fileID + ext
 			}
-			err = insertPost(db, p.post.User, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
+			err = insertPost(db, p.User.Username, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
 			if err != nil {
 				http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
 				return
