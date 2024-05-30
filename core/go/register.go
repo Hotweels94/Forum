@@ -28,7 +28,8 @@ func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				reg.user.Password = r.FormValue("password")
 
 				insertUser(db, reg.user.Email, reg.user.Username, reg.user.Password)
-
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
 			}
 		} else {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
