@@ -82,8 +82,38 @@ func modifyUsername(db *sql.DB, newUsername string, oldUsername string) error {
 	_, err := db.Exec("UPDATE users SET username = ? WHERE username = ?", newUsername, oldUsername)
 	if err != nil {
 		fmt.Println("Error updating user:", err)
+		return err
 	}
-	return err
+
+	err = updatePostsUsername(db, newUsername, oldUsername)
+	if err != nil {
+		fmt.Println("Error updating posts:", err)
+		return err
+	}
+
+	err = updateCommentsUsername(db, newUsername, oldUsername)
+	if err != nil {
+		fmt.Println("Error updating comments:", err)
+		return err
+	}
+
+	return nil
+}
+
+func updatePostsUsername(db *sql.DB, newUsername string, oldUsername string) error {
+	_, err := db.Exec("UPDATE post SET user = ? WHERE user = ?", newUsername, oldUsername)
+	if err != nil {
+		return fmt.Errorf("error updating posts: %w", err)
+	}
+	return nil
+}
+
+func updateCommentsUsername(db *sql.DB, newUsername string, oldUsername string) error {
+	_, err := db.Exec("UPDATE comment SET user = ? WHERE user = ?", newUsername, oldUsername)
+	if err != nil {
+		return fmt.Errorf("error updating comments: %w", err)
+	}
+	return nil
 }
 
 func modifyEmail(db *sql.DB, newEmail string, oldEmail string) error {

@@ -164,6 +164,12 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
+			if verifyCookie(r) {
+				p.IsConnected = true
+				p.User = userSession
+			} else {
+				p.IsConnected = false
+			}
 			err := r.ParseMultipartForm(20 << 20)
 			if err != nil {
 				http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
