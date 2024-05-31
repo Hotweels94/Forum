@@ -39,6 +39,7 @@ func (l *Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					userSessions[sessionToken.String()] = structs.User{
 						Username: userData.Username,
 						Email:    userData.Email,
+						Role:     userData.Role,
 					}
 
 					CreateCookie(w, "session_token", sessionToken.String())
