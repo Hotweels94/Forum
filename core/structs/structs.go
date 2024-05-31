@@ -4,7 +4,8 @@ type User struct {
 	Email       string
 	Username    string
 	Password    string
-	isConnected bool
+	IsConnected bool
+	Role        string
 }
 
 type Post struct {
