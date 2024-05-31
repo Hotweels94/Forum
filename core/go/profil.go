@@ -47,7 +47,6 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			p.User = userSession
-			fmt.Println(p.User.Role)
 
 			if r.Method == "POST" {
 				action := r.FormValue("action")

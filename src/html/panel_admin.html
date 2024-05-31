@@ -6,13 +6,13 @@
     <title>Admin</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body>
+<body class="panel-admin-page">
     {{if eq .User.Role "admin"}}
-    <h1>SALUT</h1>
+    <h1>Changement de Rôles</h1>
         {{range .ListUser}}
         <form action="/panel_admin" method="POST">
             <input type="hidden" name="username" value="{{.Username}}">
-            <button class="modify-role-button" type="submit" name="action" value="modify_role">{{.Username}}</button>
+            <button class="modify-role-button" type="submit" name="action" value="modify_role">{{.Username}} est {{.Role}}</button>
         </form>
         {{end}}
     {{else}}

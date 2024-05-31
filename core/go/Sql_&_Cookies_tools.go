@@ -101,15 +101,6 @@ func getAllUsers(db *sql.DB) ([]structs.User, error) {
 	return users, nil
 }
 
-func getRole(db *sql.DB, username string, role string) string {
-	var userData structs.User
-	err := db.QueryRow("SELECT role FROM users WHERE username = ?", role).Scan(&userData.Username)
-	if err != nil {
-		return ""
-	}
-	return role
-}
-
 func modifyUsername(db *sql.DB, newUsername string, oldUsername string) error {
 	_, err := db.Exec("UPDATE users SET username = ? WHERE username = ?", newUsername, oldUsername)
 	if err != nil {
@@ -156,12 +147,30 @@ func modifyEmail(db *sql.DB, newEmail string, oldEmail string) error {
 	return err
 }
 
-func modifyRoleAsModerator(db *sql.DB, username string) error {
-	_, err := db.Exec("UPDATE users SET role = 'moderator' WHERE username = ?", username)
+func modifyRole(db *sql.DB, username string) error {
+	var currentRole string
+	err := db.QueryRow("SELECT role FROM users WHERE username = ?", username).Scan(&currentRole)
 	if err != nil {
-		fmt.Println("Error updating user:", err)
+		fmt.Println(err)
+		return err
 	}
-	return err
+
+	var newRole string
+	if currentRole == "admin" {
+		newRole = "admin"
+	} else if currentRole == "user" {
+		newRole = "moderator"
+	} else {
+		newRole = "user"
+	}
+
+	_, err = db.Exec("UPDATE users SET role = ? WHERE username = ?", newRole, username)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }
 
 func CreateCookie(w http.ResponseWriter, name string, value string) {

@@ -37,7 +37,7 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			action := r.FormValue("action")
 			if action == "modify_role" {
 				username := r.FormValue("username")
-				err := modifyRoleAsModerator(db, username)
+				err := modifyRole(db, username)
 				if err != nil {
 					http.Error(w, "Erreur lors de la modification du rôle", http.StatusInternalServerError)
 					fmt.Println(err)
@@ -52,7 +52,6 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/profile", http.StatusFound)
 		return
 	}
-	fmt.Println(a.ListUser)
 
 	t, _ = template.ParseFiles("src/html/panel_admin.html")
 	t.Execute(w, a)
