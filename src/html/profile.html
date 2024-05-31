@@ -27,6 +27,9 @@
             <button class ="logout-button" type="submit" name="action" value="logout">Déconnexion</button>
         </form>
         <a href="/"><button class="acceuil_button_profile">Accueil</button></a>
+        {{if eq .User.Role "admin"}}
+            <a href="/panel_admin"><button class="panel_admin">Administration</button></a>
+        {{end}}
     </div>
 </body>
 </html>

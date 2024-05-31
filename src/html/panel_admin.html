@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="stylesheet" href="/src/css/style.css">
+</head>
+<body>
+    {{if eq .User.Role "admin"}}
+    <h1>SALUT</h1>
+        {{range .User}}
+            <input class="user_role_button" type="submit" name="action" value="{{.User.Username}}">
+        {{end}}
+    {{else}}
+        <h1>Vous n'étes pas un administrateur</h1>
+    {{end}}
+</body>
+</html>
