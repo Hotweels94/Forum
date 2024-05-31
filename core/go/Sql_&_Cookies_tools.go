@@ -79,13 +79,26 @@ func getEmail(db *sql.DB, email string) string {
 	return userData.Email
 }
 
-func getAllUserDataById(db *sql.DB, id int) structs.User {
-	var userData structs.User
-	err := db.QueryRow("SELECT username, email, role FROM users WHERE id = ?", id).Scan(&userData.Username, &userData.Email, &userData.Role)
+func getAllUsers(db *sql.DB) ([]structs.User, error) {
+	rows, err := db.Query("SELECT username, role FROM users")
 	if err != nil {
-		return structs.User{}
+		return nil, err
 	}
-	return userData
+	defer rows.Close()
+
+	var users []structs.User
+	for rows.Next() {
+		var user structs.User
+		if err := rows.Scan(&user.Username, &user.Role); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func getRole(db *sql.DB, username string, role string) string {

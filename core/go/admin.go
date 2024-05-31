@@ -23,10 +23,16 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if verifyCookie(r) {
 		a.User = userSession
-		for i := 0; i < 10; i++ {
-			userAtI := getAllUserDataById(db, i)
-			a.ListUser = append(a.ListUser, userAtI)
+		users, err := getAllUsers(db)
+
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération des utilisateurs ", http.StatusInternalServerError)
+			fmt.Println(err)
+			return
 		}
+
+		a.ListUser = users
+
 	} else {
 		http.Redirect(w, r, "/profile", http.StatusFound)
 		return
