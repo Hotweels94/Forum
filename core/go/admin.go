@@ -33,6 +33,21 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		a.ListUser = users
 
+		if r.Method == "POST" {
+			action := r.FormValue("action")
+			if action == "modify_role" {
+				username := r.FormValue("username")
+				err := modifyRoleAsModerator(db, username)
+				if err != nil {
+					http.Error(w, "Erreur lors de la modification du rôle", http.StatusInternalServerError)
+					fmt.Println(err)
+					return
+				}
+				http.Redirect(w, r, "/panel_admin", http.StatusFound)
+				return
+			}
+		}
+
 	} else {
 		http.Redirect(w, r, "/profile", http.StatusFound)
 		return

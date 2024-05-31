@@ -10,7 +10,10 @@
     {{if eq .User.Role "admin"}}
     <h1>SALUT</h1>
         {{range .ListUser}}
-            <input class="user_role_button" type="submit" name="action" value="{{.Username}}">
+        <form action="/panel_admin" method="POST">
+            <input type="hidden" name="username" value="{{.Username}}">
+            <button class="modify-role-button" type="submit" name="action" value="modify_role">{{.Username}}</button>
+        </form>
         {{end}}
     {{else}}
         <h1>Vous n'étes pas un administrateur</h1>

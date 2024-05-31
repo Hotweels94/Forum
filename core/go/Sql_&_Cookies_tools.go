@@ -156,8 +156,8 @@ func modifyEmail(db *sql.DB, newEmail string, oldEmail string) error {
 	return err
 }
 
-func modifyRole(db *sql.DB, username string, role string) error {
-	_, err := db.Exec("UPDATE users SET role = ? WHERE username = ?", role, username)
+func modifyRoleAsModerator(db *sql.DB, username string) error {
+	_, err := db.Exec("UPDATE users SET role = 'moderator' WHERE username = ?", username)
 	if err != nil {
 		fmt.Println("Error updating user:", err)
 	}
