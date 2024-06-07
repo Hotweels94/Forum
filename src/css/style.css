@@ -497,7 +497,7 @@ body {
     background-color: #141414;
     color: #fff;
     padding: 20px 80px;
-    font-family: 'YourCustomFont', sans-serif; /* Assurez-vous que cette police est définie dans votre CSS */
+    font-family: 'YourCustomFont', sans-serif;
 }
 
 .post-detail {
@@ -621,4 +621,34 @@ body {
 
 .panel-admin-page .modify-role-button:hover {
     background-color: rgb(52,52,200);
+}
+
+/* User post page */
+
+.user-posts-page {
+    background-color: #141414;
+    color: #fff;
+    padding: 20px 80px;
+    font-family: 'YourCustomFont', sans-serif;
+}
+
+.user-posts-page .user_posts_content h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-posts-page .user_posts_content h2 {
+    margin-top: 0;
+}
+
+.user-posts-page .user_posts_content p {
+    margin: 10px 0;
+}
+
+.user-posts-page .user_posts_content img {
+    max-width: 25%;
+    max-height: 25%;
+    border-radius: 25px;
+    display: block;
+    margin: 20px auto;
 }
