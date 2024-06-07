@@ -63,5 +63,6 @@ func HandleForum() {
 	http.Handle("/list_category", new(Categories))
 	http.Handle("/list_post", new(list_Post))
 	http.Handle("/panel_admin", new(Admin))
+	http.Handle("/report", new(Posts))
 	http.ListenAndServe(":8080", nil)
 }

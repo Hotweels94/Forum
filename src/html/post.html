@@ -14,7 +14,19 @@
         {{if .Post.ImageURL}}
             <img src="{{.Post.ImageURL}}" alt="Image">
         {{end}}
-    </div>
+
+        <div class="post-actions">
+            <form method="post" action="/post">
+                <input type="hidden" name="id" value="{{.Post.ID}}">
+                <input type="hidden" name="action" value="delete">
+                <button type="submit">Supprimer</button>
+            </form>
+            <form method="post" action="/post">
+                <input type="hidden" name="id" value="{{.Post.ID}}">
+                <input type="hidden" name="action" value="report">
+                <button type="submit">Signaler</button>
+            </form>
+        </div>        
 
     <div class="comments">
         {{if .Comments}}
@@ -30,6 +42,7 @@
         <div class="comment-form">
             <h3>Ajouter un commentaire</h3>
             <form action="/post?id={{.Post.ID}}" method="post">
+                <input type="hidden" name="action" value="comment">
                 <div>
                     <textarea id="comment" name="comment" rows="4" required></textarea>
                 </div>

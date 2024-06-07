@@ -35,6 +35,7 @@ func initDBPost() (*sql.DB, error) {
             title TEXT NOT NULL,
             imageURL TEXT,
             category_id INTEGER NOT NULL,
+            reported INTEGER DEFAULT 0,
             UNIQUE(id)
         )
     `)
@@ -129,6 +130,54 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/post":
+		if r.Method == "POST" {
+			id := r.FormValue("id")
+			action := r.FormValue("action")
+			fmt.Print("action :")
+			fmt.Println(action)
+			switch action {
+			case "comment":
+				text := r.FormValue("comment")
+				fmt.Println("avant verif cookie")
+				if verifyCookie(r) {
+					p.IsConnected = true
+					p.User = userSession
+				} else {
+					p.IsConnected = false
+				}
+				fmt.Println("avnt insert comment")
+				err := insertComment(db, id, p.User.Username, text)
+				if err != nil {
+					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
+					fmt.Println(err)
+					return
+				}
+			case "delete":
+				if verifyCookie(r) {
+					fmt.Println("delete post")
+					err := deletePostByID(db, id)
+					if err != nil {
+						http.Error(w, "Erreur lors de la suppression du post", http.StatusInternalServerError)
+						fmt.Println(err)
+						return
+					}
+					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
+				}
+			case "report":
+				if verifyCookie(r) {
+					err := reportPostByID(db, id)
+					if err != nil {
+						http.Error(w, "Erreur lors du signalement du post", http.StatusInternalServerError)
+						fmt.Println(err)
+						return
+					}
+					http.Redirect(w, r, "/report", http.StatusSeeOther)
+					return
+				}
+			}
+		}
+
 		id := r.URL.Query().Get("id")
 		if id != "" {
 			post, err := GetPostByID(db, id)
@@ -137,22 +186,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if r.Method == "POST" {
-				text := r.FormValue("comment")
-				if verifyCookie(r) {
-					p.IsConnected = true
-					p.User = userSession
-				} else {
-					p.IsConnected = false
-				}
-				err := insertComment(db, id, p.User.Username, text)
-				if err != nil {
-					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
-					fmt.Println(err)
-					return
-				}
-
-			}
 			comments, err := getCommentsByPostID(db, id)
 			if err != nil {
 				http.Error(w, "Erreur lors de la récupération des commentaires", http.StatusInternalServerError)
@@ -170,7 +203,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			} else {
 				p.IsConnected = false
 			}
-			err := r.ParseMultipartForm(20 << 20)
+			err := r.ParseForm()
 			if err != nil {
 				http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
 				return
@@ -264,6 +297,15 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			pp.IsConnected = false
 		}
 		t.Execute(w, pp)
+	case "/report":
+		reportedPosts, err := getReportedPosts(db)
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération des posts signalés", http.StatusInternalServerError)
+			return
+		}
+		t, _ := template.ParseFiles("src/html/report.html")
+		t.Execute(w, ReportedPosts{Posts: reportedPosts})
+		return
 	default:
 		http.NotFound(w, r)
 	}
@@ -305,4 +347,9 @@ func getCategories(db *sql.DB) ([]structs.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func deletePostByID(db *sql.DB, id string) error {
+	_, err := db.Exec("DELETE FROM post WHERE id = ?", id)
+	return err
 }
