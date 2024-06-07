@@ -107,10 +107,36 @@ type list_Post struct {
 }
 
 func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var t *template.Template
-	t, _ = template.ParseFiles("src/html/list_post.html")
+	db, err := initDBPost()
+	if err != nil {
+		http.Error(w, "Erreur de connexion à la base de données", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
-	t.Execute(w, nil)
+	var t *template.Template
+
+	switch r.URL.Path {
+	case "/list_post":
+		t, _ = template.ParseFiles("src/html/list_post.html")
+		t.Execute(w, nil)
+		return
+	case "/user_posts":
+		var posts list_Post
+
+		if r.URL.Query().Get("username") != "" {
+			username := r.URL.Query().Get("username")
+			posts, err = GetListPostByUsername(db, username)
+			if err != nil {
+				http.Error(w, "Erreur lors de la récupération des posts de la liste de vos posts", http.StatusInternalServerError)
+				return
+			}
+		}
+		t, _ = template.ParseFiles("src/html/user_posts.html")
+		t.Execute(w, posts)
+	default:
+		http.NotFound(w, r)
+	}
 }
 
 func GetListPostByCategoryID(db *sql.DB, categoryID int) (list_Post, error) {

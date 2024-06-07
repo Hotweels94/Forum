@@ -9,7 +9,7 @@
 <body class="post-detail-page">
     <div class="post-detail">
         <h2>{{.Post.Title}}</h2>
-        <h3>Post de : {{.Post.User}}</h3>
+        <h3>Post de : <a href="/user_posts?username={{.Post.User}}"><button class="user_post_button">{{.Post.User}}</button></a></h3>
         <p>{{.Post.Text}}</p>
         {{if .Post.ImageURL}}
             <img src="{{.Post.ImageURL}}" alt="Image">

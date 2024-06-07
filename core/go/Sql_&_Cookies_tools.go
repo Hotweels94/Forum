@@ -173,6 +173,33 @@ func modifyRole(db *sql.DB, username string) error {
 	return nil
 }
 
+func GetListPostByUsername(db *sql.DB, username string) (list_Post, error) {
+	var listPost list_Post
+
+	// Query to get the posts by category_id
+	postsQuery := `SELECT id, user, text, title, imageURL, category_id FROM post WHERE user = ?`
+	rows, err := db.Query(postsQuery, username)
+	if err != nil {
+		return listPost, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post structs.Post
+		err := rows.Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL, &post.SelectedCategory)
+		if err != nil {
+			return listPost, err
+		}
+		listPost.Posts = append(listPost.Posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return listPost, err
+	}
+
+	return listPost, nil
+}
+
 func CreateCookie(w http.ResponseWriter, name string, value string) {
 	cookie := &http.Cookie{
 		Name:     name,

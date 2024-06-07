@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"fmt"
 	"forum/core/structs"
 	"html/template"
 	"net/http"
@@ -15,15 +14,6 @@ type mainInfo struct {
 	NumberOfVisit int
 	User          structs.User
 	IsConnected   bool
-}
-
-type web struct {
-	Test string
-}
-
-func (web *web) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	web.Test = "Forum Nico Ryan"
-	fmt.Fprintf(w, web.Test)
 }
 
 func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +44,6 @@ func HandleForum() {
 	http.Handle("/databases/upload_image/", http.StripPrefix("/databases/upload_image/", http.FileServer(http.Dir("databases/upload_image"))))
 
 	http.Handle("/", new(mainInfo))
-	http.Handle("/test", new(web))
 	http.Handle("/register", new(Register))
 	http.Handle("/login", new(Login))
 	http.Handle("/profile", new(Profil))
@@ -64,5 +53,6 @@ func HandleForum() {
 	http.Handle("/list_post", new(list_Post))
 	http.Handle("/panel_admin", new(Admin))
 	http.Handle("/report", new(Posts))
+	http.Handle("/user_posts", new(list_Post))
 	http.ListenAndServe(":8080", nil)
 }
