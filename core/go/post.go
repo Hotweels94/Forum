@@ -133,19 +133,16 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			id := r.FormValue("id")
 			action := r.FormValue("action")
-			fmt.Print("action :")
 			fmt.Println(action)
 			switch action {
 			case "comment":
 				text := r.FormValue("comment")
-				fmt.Println("avant verif cookie")
 				if verifyCookie(r) {
 					p.IsConnected = true
 					p.User = userSession
 				} else {
 					p.IsConnected = false
 				}
-				fmt.Println("avnt insert comment")
 				err := insertComment(db, id, p.User.Username, text)
 				if err != nil {
 					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
@@ -154,7 +151,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 			case "delete":
 				if verifyCookie(r) {
-					fmt.Println("delete post")
 					err := deletePostByID(db, id)
 					if err != nil {
 						http.Error(w, "Erreur lors de la suppression du post", http.StatusInternalServerError)
@@ -162,6 +158,19 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
+				}
+			case "deletecomment":
+				if verifyCookie(r) {
+					idcomment := r.FormValue("id")
+					idint, _ := strconv.Atoi(idcomment)
+					err := deleteCommentByID(db, idint)
+					if err != nil {
+						http.Error(w, "Erreur lors de la suppression du commentaire", http.StatusInternalServerError)
+						fmt.Println(err)
+						return
+					}
+					http.Redirect(w, r, "/"+id, http.StatusSeeOther)
 					return
 				}
 			case "report":
@@ -351,5 +360,16 @@ func getCategories(db *sql.DB) ([]structs.Category, error) {
 
 func deletePostByID(db *sql.DB, id string) error {
 	_, err := db.Exec("DELETE FROM post WHERE id = ?", id)
+	deleteCommentByPostID(db, id)
+	return err
+}
+
+func deleteCommentByID(db *sql.DB, id int) error {
+	_, err := db.Exec("DELETE FROM comment WHERE id = ?", id)
+	return err
+}
+
+func deleteCommentByPostID(db *sql.DB, id string) error {
+	_, err := db.Exec("DELETE FROM comment WHERE post_id = ?", id)
 	return err
 }

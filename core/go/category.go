@@ -87,6 +87,34 @@ func (ch Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "/list_category":
+		if r.Method == "POST" {
+			action := r.FormValue("action")
+			switch action {
+			case "delete":
+				fmt.Println("delete category")
+				if verifyCookie(r) {
+					idcategory := r.FormValue("id")
+					idcategoryint, _ := strconv.Atoi(idcategory)
+					err := deleteCategory(db, idcategoryint)
+					if err != nil {
+						fmt.Println(err)
+						http.Error(w, "Erreur lors de la suppression de la category", http.StatusInternalServerError)
+						fmt.Println(err)
+						return
+					}
+					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
+				}
+
+			default:
+				err := r.ParseForm()
+				if err != nil {
+					http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
+					return
+				}
+			}
+			http.Redirect(w, r, "/list_category", http.StatusSeeOther)
+		}
 		categories, err := getCategories(db)
 		if err != nil {
 			http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
@@ -173,4 +201,25 @@ func GetListPostByCategoryID(db *sql.DB, categoryID int) (list_Post, error) {
 	}
 
 	return listPost, nil
+}
+
+func deleteCategory(db *sql.DB, id int) error {
+
+	posts, err := GetListPostByCategoryID(db, id)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	for _, post := range posts.Posts {
+		err = deletePostByID(db, post.ID)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+	}
+	_, err = db.Exec("DELETE FROM category WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -12,6 +12,11 @@
         {{range .}}
             <a href="/category?id={{.ID}}" class="category-link">
                 <button class="button_categories" id="{{.ID}}">{{.Name}}</button>
+                <form method="post" action="/list_category">
+                    <input type="hidden" name="id" value="{{.ID}}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit">Supprimer</button>
+                </form>
             </a>
         {{end}}
     </div>

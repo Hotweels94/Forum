@@ -32,9 +32,14 @@
         {{if .Comments}}
             <h3>Commentaires</h3>
             {{range .Comments}}
-                <div class="comment">
+                <div class="comment">                  
                     <h4>{{.User}}</h4>
                     <p>{{.Text}}</p>
+                    <form method="post" action="/post">
+                        <input type="hidden" name="id" value="{{.ID}}">
+                        <input type="hidden" name="action" value="deletecomment">
+                        <button type="submit">Supprimer</button>
+                    </form>
                 </div>
             {{end}}
         {{end}}
