@@ -62,37 +62,41 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/category":
-		if r.URL.Query().Get("id") != "" {
-			id := r.URL.Query().Get("id")
-			idint, _ := strconv.Atoi(id)
-			posts, err := GetListPostByCategoryID(db, idint)
-			if err != nil {
-				http.Error(w, "Erreur lors de la récupération des posts de la catégorie", http.StatusInternalServerError)
-				return
+		if ch.User.Role == "admin" || ch.User.Role == "moderator" || ch.User.Role == "user" {
+			if r.URL.Query().Get("id") != "" {
+				id := r.URL.Query().Get("id")
+				idint, _ := strconv.Atoi(id)
+				posts, err := GetListPostByCategoryID(db, idint)
+				if err != nil {
+					http.Error(w, "Erreur lors de la récupération des posts de la catégorie", http.StatusInternalServerError)
+					return
+				}
+				t, _ := template.ParseFiles("src/html/list_post.html")
+				t.Execute(w, posts)
+			} else {
+				if r.Method == "POST" {
+					err := r.ParseForm()
+					if err != nil {
+						http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
+						return
+					}
+					name := r.FormValue("name")
+					description := r.FormValue("description")
+
+					err = insertCategory(db, name, description)
+					if err != nil {
+						http.Error(w, "Erreur lors de l'insertion de la catégorie dans la base de données", http.StatusInternalServerError)
+						return
+					}
+
+					http.Redirect(w, r, "/", http.StatusFound)
+					return
+				}
+				t, _ := template.ParseFiles("src/html/category.html")
+				t.Execute(w, nil)
 			}
-			t, _ := template.ParseFiles("src/html/list_post.html")
-			t.Execute(w, posts)
 		} else {
-			if r.Method == "POST" {
-				err := r.ParseForm()
-				if err != nil {
-					http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
-					return
-				}
-				name := r.FormValue("name")
-				description := r.FormValue("description")
-
-				err = insertCategory(db, name, description)
-				if err != nil {
-					http.Error(w, "Erreur lors de l'insertion de la catégorie dans la base de données", http.StatusInternalServerError)
-					return
-				}
-
-				http.Redirect(w, r, "/", http.StatusFound)
-				return
-			}
-			t, _ := template.ParseFiles("src/html/category.html")
-			t.Execute(w, nil)
+			http.Redirect(w, r, "/", http.StatusFound)
 		}
 
 	case "/list_category":

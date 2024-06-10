@@ -128,63 +128,76 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	var pageData structs.PostWithComments
+
+	if verifyCookie(r) {
+		pageData.IsConnected = true
+		pageData.User = userSession
+	} else {
+		pageData.IsConnected = false
+	}
+
 	switch r.URL.Path {
 	case "/post":
-		if r.Method == "POST" {
-			id := r.FormValue("id")
-			action := r.FormValue("action")
-			fmt.Println(action)
-			switch action {
-			case "comment":
-				text := r.FormValue("comment")
-				if verifyCookie(r) {
-					p.IsConnected = true
-					p.User = userSession
-				} else {
-					p.IsConnected = false
-				}
-				err := insertComment(db, id, p.User.Username, text)
-				if err != nil {
-					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
-					fmt.Println(err)
-					return
-				}
-			case "delete":
-				if verifyCookie(r) {
-					err := deletePostByID(db, id)
+		if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" {
+			if r.Method == "POST" {
+				id := r.FormValue("id")
+				action := r.FormValue("action")
+				fmt.Println(action)
+				switch action {
+				case "comment":
+					text := r.FormValue("comment")
+					if verifyCookie(r) {
+						p.IsConnected = true
+						p.User = userSession
+					} else {
+						p.IsConnected = false
+					}
+					err := insertComment(db, id, p.User.Username, text)
 					if err != nil {
-						http.Error(w, "Erreur lors de la suppression du post", http.StatusInternalServerError)
+						http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
 						fmt.Println(err)
 						return
 					}
-					http.Redirect(w, r, "/", http.StatusSeeOther)
-					return
-				}
-			case "deletecomment":
-				if verifyCookie(r) {
-					idcomment := r.FormValue("id")
-					idint, _ := strconv.Atoi(idcomment)
-					err := deleteCommentByID(db, idint)
-					if err != nil {
-						http.Error(w, "Erreur lors de la suppression du commentaire", http.StatusInternalServerError)
-						fmt.Println(err)
+				case "delete":
+					if verifyCookie(r) {
+						err := deletePostByID(db, id)
+						if err != nil {
+							http.Error(w, "Erreur lors de la suppression du post", http.StatusInternalServerError)
+							fmt.Println(err)
+							return
+						}
+						http.Redirect(w, r, "/", http.StatusSeeOther)
 						return
 					}
-					http.Redirect(w, r, "/"+id, http.StatusSeeOther)
-					return
-				}
-			case "report":
-				if verifyCookie(r) {
-					err := reportPostByID(db, id)
-					if err != nil {
-						http.Error(w, "Erreur lors du signalement du post", http.StatusInternalServerError)
-						fmt.Println(err)
+				case "deletecomment":
+					if verifyCookie(r) {
+						idcomment := r.FormValue("id")
+						idint, _ := strconv.Atoi(idcomment)
+						err := deleteCommentByID(db, idint)
+						if err != nil {
+							http.Error(w, "Erreur lors de la suppression du commentaire", http.StatusInternalServerError)
+							fmt.Println(err)
+							return
+						}
+						http.Redirect(w, r, "/"+id, http.StatusSeeOther)
 						return
 					}
-					http.Redirect(w, r, "/report", http.StatusSeeOther)
-					return
+				case "report":
+					if verifyCookie(r) {
+						err := reportPostByID(db, id)
+						if err != nil {
+							http.Error(w, "Erreur lors du signalement du post", http.StatusInternalServerError)
+							fmt.Println(err)
+							return
+						}
+						http.Redirect(w, r, "/report", http.StatusSeeOther)
+						return
+					}
 				}
 			}
+		} else {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 		}
 
 		id := r.URL.Query().Get("id")
@@ -201,16 +214,8 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			var pageData structs.PostWithComments
 			pageData.Post = post
 			pageData.Comments = comments
-
-			if verifyCookie(r) {
-				pageData.IsConnected = true
-				pageData.User = userSession
-			} else {
-				pageData.IsConnected = false
-			}
 
 			t, _ := template.ParseFiles("src/html/post.html")
 			t.Execute(w, pageData)
