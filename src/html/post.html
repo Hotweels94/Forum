@@ -15,18 +15,20 @@
             <img src="{{.Post.ImageURL}}" alt="Image">
         {{end}}
 
-        <div class="post-actions">
-            <form method="post" action="/post">
-                <input type="hidden" name="id" value="{{.Post.ID}}">
-                <input type="hidden" name="action" value="delete">
-                <button type="submit">Supprimer</button>
-            </form>
-            <form method="post" action="/post">
-                <input type="hidden" name="id" value="{{.Post.ID}}">
-                <input type="hidden" name="action" value="report">
-                <button type="submit">Signaler</button>
-            </form>
-        </div>        
+        {{if or (eq .User.Role "admin") (eq .User.Role "moderator")}}
+            <div class="post-actions">
+                <form method="post" action="/post">
+                    <input type="hidden" name="id" value="{{.Post.ID}}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit">Supprimer</button>
+                </form>
+                <form method="post" action="/post">
+                    <input type="hidden" name="id" value="{{.Post.ID}}">
+                    <input type="hidden" name="action" value="report">
+                    <button type="submit">Signaler</button>
+                </form>
+            </div>     
+        {{end}}
 
     <div class="comments">
         {{if .Comments}}
@@ -35,27 +37,31 @@
                 <div class="comment">                  
                     <h4>{{.User}}</h4>
                     <p>{{.Text}}</p>
-                    <form method="post" action="/post">
-                        <input type="hidden" name="id" value="{{.ID}}">
-                        <input type="hidden" name="action" value="deletecomment">
-                        <button type="submit">Supprimer</button>
-                    </form>
+                    {{if or (eq $.User.Role "admin") (eq $.User.Role "moderator")}}
+                        <form method="post" action="/post">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <input type="hidden" name="action" value="deletecomment">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    {{end}}
                 </div>
             {{end}}
         {{end}}
 
-        <div class="comment-form">
-            <h3>Ajouter un commentaire</h3>
-            <form action="/post?id={{.Post.ID}}" method="post">
-                <input type="hidden" name="action" value="comment">
-                <div>
-                    <textarea id="comment" name="comment" rows="4" required></textarea>
-                </div>
-                <div>
-                    <input type="submit" value="Répondre">
-                </div>
-            </form>
-        </div>
+        {{if $.IsConnected}}
+            <div class="comment-form">
+                <h3>Ajouter un commentaire</h3>
+                <form action="/post?id={{.Post.ID}}" method="post">
+                    <input type="hidden" name="action" value="comment">
+                    <div>
+                        <textarea id="comment" name="comment" rows="4" required></textarea>
+                    </div>
+                    <div>
+                        <input type="submit" value="Répondre">
+                    </div>
+                </form>
+            </div>
+        {{end}}
     </div>
 </body>
 </html>

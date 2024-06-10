@@ -10,7 +10,9 @@ import (
 )
 
 type Categories struct {
-	category structs.Category
+	Categories  []structs.Category
+	User        structs.User
+	IsConnected bool
 }
 
 func initDBCategory() (*sql.DB, error) {
@@ -43,13 +45,20 @@ func insertCategory(db *sql.DB, name string, description string) error {
 	return nil
 }
 
-func (ch Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBCategory()
 	if err != nil {
 		http.Error(w, "Erreur de connexion à la base de données", http.StatusInternalServerError)
 		return
 	}
 	defer db.Close()
+
+	if verifyCookie(r) {
+		ch.IsConnected = true
+		ch.User = userSession
+	} else {
+		ch.IsConnected = false
+	}
 
 	switch r.URL.Path {
 	case "/category":
@@ -120,8 +129,9 @@ func (ch Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
 			return
 		}
+		ch.Categories = categories
 		t, _ := template.ParseFiles("src/html/list_category.html")
-		t.Execute(w, categories)
+		t.Execute(w, ch)
 
 	default:
 		http.NotFound(w, r)

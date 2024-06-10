@@ -9,13 +9,18 @@
 <body class="list-categories-page">
     <div class="list_categories">
         <h1>Voici les Catégories présentes sur le site !</h1>
-        {{range .}}
+        {{range .Categories}}
             <a href="/category?id={{.ID}}" class="category-link">
                 <button class="button_categories" id="{{.ID}}">{{.Name}}</button>
                 <form method="post" action="/list_category">
                     <input type="hidden" name="id" value="{{.ID}}">
                     <input type="hidden" name="action" value="delete">
-                    <button type="submit">Supprimer</button>
+
+                    {{if $.IsConnected}}
+                        {{if or (eq $.User.Role "admin") (eq $.User.Role "moderator")}}
+                            <button type="submit">Supprimer</button>
+                        {{end}}
+                    {{end}}
                 </form>
             </a>
         {{end}}

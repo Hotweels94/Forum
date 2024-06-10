@@ -79,6 +79,15 @@ func getEmail(db *sql.DB, email string) string {
 	return userData.Email
 }
 
+func getRole(db *sql.DB, username string) string {
+	var userData structs.User
+	err := db.QueryRow("SELECT role FROM users WHERE username = ?", username).Scan(&userData.Role)
+	if err != nil {
+		return ""
+	}
+	return userData.Role
+}
+
 func getAllUsers(db *sql.DB) ([]structs.User, error) {
 	rows, err := db.Query("SELECT username, role FROM users")
 	if err != nil {
@@ -171,6 +180,14 @@ func modifyRole(db *sql.DB, username string) error {
 	}
 
 	return nil
+}
+
+func deleteRole(db *sql.DB, username string, role string) error {
+	_, err := db.Exec("UPDATE users SET role = ? WHERE username = ?", role, username)
+	if err != nil {
+		fmt.Println("Error updating user:", err)
+	}
+	return err
 }
 
 func GetListPostByUsername(db *sql.DB, username string) (list_Post, error) {

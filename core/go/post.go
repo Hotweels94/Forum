@@ -200,8 +200,20 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de la récupération des commentaires", http.StatusInternalServerError)
 				return
 			}
+
+			var pageData structs.PostWithComments
+			pageData.Post = post
+			pageData.Comments = comments
+
+			if verifyCookie(r) {
+				pageData.IsConnected = true
+				pageData.User = userSession
+			} else {
+				pageData.IsConnected = false
+			}
+
 			t, _ := template.ParseFiles("src/html/post.html")
-			t.Execute(w, structs.PostWithComments{Post: post, Comments: comments})
+			t.Execute(w, pageData)
 			return
 		}
 
@@ -301,7 +313,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if verifyCookie(r) {
 			pp.IsConnected = true
 			pp.User = userSession
-			fmt.Println(pp.User.Username)
 		} else {
 			pp.IsConnected = false
 		}

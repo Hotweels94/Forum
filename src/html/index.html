@@ -13,11 +13,15 @@
             <div class="onglets">
                 <a href="/list_category">Catégories</a>
 
-                {{if or (eq .User.Role "admin") (eq .User.Role "moderator")}}
-                    <a href="/category">Créer une categorie</a>
+                {{if .IsConnected}}
+                    {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
+                        <a href="/category">Créer une categorie</a>
+                    {{end}}
+
+                    {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
+                        <a href="/post">Créer un post</a>
+                    {{end}}
                 {{end}}
-                
-                <a href="/post">Créer un post</a>
             </div>
             <div class="login-register">
                 {{if .IsConnected}}

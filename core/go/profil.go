@@ -69,6 +69,10 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if action == "logout" {
+					if err != nil {
+						fmt.Println(err)
+					}
+					p.User.Role = ""
 					DeleteCookie(w, "session_token")
 					http.Redirect(w, r, "/login", http.StatusFound)
 				}

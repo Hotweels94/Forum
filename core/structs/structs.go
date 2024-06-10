@@ -32,8 +32,10 @@ type Comment struct {
 }
 
 type PostWithComments struct {
-	Post     Post
-	Comments []Comment
+	Post        Post
+	Comments    []Comment
+	User        User
+	IsConnected bool
 }
 
 type List_Post struct {
