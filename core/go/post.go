@@ -218,7 +218,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
-			if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" {
+			if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" { //double check useless
 				if verifyCookie(r) {
 					p.IsConnected = true
 					p.User = userSession
@@ -293,32 +293,36 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
+		if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" {
+			categories, err := getCategories(db)
+			if err != nil {
+				http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
+				return
+			}
 
-		categories, err := getCategories(db)
-		if err != nil {
-			http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
+			var convertedCategories []structs.Category
+			for _, c := range categories {
+				convertedCategories = append(convertedCategories, structs.Category(c))
+			}
+
+			t, _ := template.ParseFiles("src/html/create_post.html")
+			pp := structs.PostPage{
+				Post:        p.post,
+				Categories:  convertedCategories,
+				User:        p.User,
+				IsConnected: p.IsConnected,
+			}
+			if verifyCookie(r) {
+				pp.IsConnected = true
+				pp.User = userSession
+			} else {
+				pp.IsConnected = false
+			}
+			t.Execute(w, pp)
+		} else {
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
-
-		var convertedCategories []structs.Category
-		for _, c := range categories {
-			convertedCategories = append(convertedCategories, structs.Category(c))
-		}
-
-		t, _ := template.ParseFiles("src/html/create_post.html")
-		pp := structs.PostPage{
-			Post:        p.post,
-			Categories:  convertedCategories,
-			User:        p.User,
-			IsConnected: p.IsConnected,
-		}
-		if verifyCookie(r) {
-			pp.IsConnected = true
-			pp.User = userSession
-		} else {
-			pp.IsConnected = false
-		}
-		t.Execute(w, pp)
 	case "/report":
 		reportedPosts, err := getReportedPosts(db)
 		if err != nil {
