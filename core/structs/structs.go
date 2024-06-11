@@ -36,6 +36,8 @@ type PostWithComments struct {
 	Comments    []Comment
 	User        User
 	IsConnected bool
+	Likes       int
+	Dislikes    int
 }
 
 type List_Post struct {
@@ -47,4 +49,14 @@ type Category struct {
 	ID          int
 	Name        string
 	Description string
+}
+
+type Like struct {
+	PostID string
+	User   string
+}
+
+type Dislike struct {
+	PostID string
+	User   string
 }

@@ -14,7 +14,8 @@
         {{if .Post.ImageURL}}
             <img src="{{.Post.ImageURL}}" alt="Image">
         {{end}}
-
+<p>like : {{.Likes}}</p>
+<p>dislike :{{.Dislikes}}</p>
         {{if or (eq .User.Role "admin") (eq .User.Role "moderator")}}
             <div class="post-actions">
                 <form method="post" action="/post">
@@ -26,6 +27,16 @@
                     <input type="hidden" name="id" value="{{.Post.ID}}">
                     <input type="hidden" name="action" value="report">
                     <button type="submit">Signaler</button>
+                </form>
+                <form method="post" action="/post">
+                    <input type="hidden" name="id" value="{{.Post.ID}}">
+                    <input type="hidden" name="action" value="like">
+                    <button type="submit">like</button>
+                </form>
+                <form method="post" action="/post">
+                    <input type="hidden" name="id" value="{{.Post.ID}}">
+                    <input type="hidden" name="action" value="dislike">
+                    <button type="submit">dislike</button>
                 </form>
             </div>     
         {{end}}

@@ -47,6 +47,10 @@ func initDBPost() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = initDBlike(db)
+	if err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }
@@ -193,6 +197,36 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					http.Redirect(w, r, "/report", http.StatusSeeOther)
 					return
 				}
+			case "dislike":
+				if verifyCookie(r) {
+					p.IsConnected = true
+					p.User = userSession
+				} else {
+					p.IsConnected = false
+				}
+				err := insertLike(db, id, p.User.Username, false)
+				if err != nil {
+					http.Error(w, "Erreur lors du dislike du post", http.StatusInternalServerError)
+					fmt.Println(err)
+					return
+				}
+				http.Redirect(w, r, "/post?id="+id, http.StatusSeeOther)
+				return
+			case "like":
+				if verifyCookie(r) {
+					p.IsConnected = true
+					p.User = userSession
+				} else {
+					p.IsConnected = false
+				}
+				err := insertLike(db, id, p.User.Username, true)
+				if err != nil {
+					http.Error(w, "Erreur lors du like du post", http.StatusInternalServerError)
+					fmt.Println(err)
+					return
+				}
+				http.Redirect(w, r, "/post?id="+id, http.StatusSeeOther)
+				return
 			}
 		}
 		id := r.URL.Query().Get("id")
@@ -208,9 +242,21 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de la récupération des commentaires", http.StatusInternalServerError)
 				return
 			}
+			likes, err := countLike(db, id)
+			if err != nil {
+				http.Error(w, "Erreur lors de la récupération des likes", http.StatusInternalServerError)
+				return
+			}
+			deslikes, err := countDislike(db, id)
+			if err != nil {
+				http.Error(w, "Erreur lors de la récupération des deslikes", http.StatusInternalServerError)
+				return
+			}
 
 			pageData.Post = post
 			pageData.Comments = comments
+			pageData.Likes = likes
+			pageData.Dislikes = deslikes
 
 			t, _ := template.ParseFiles("src/html/post.html")
 			t.Execute(w, pageData)

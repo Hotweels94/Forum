@@ -128,6 +128,11 @@ func modifyUsername(db *sql.DB, newUsername string, oldUsername string) error {
 		fmt.Println("Error updating comments:", err)
 		return err
 	}
+	err = updateLikeUseranem(db, oldUsername, newUsername)
+	if err != nil {
+		fmt.Println("Error updating likes:", err)
+		return err
+	}
 
 	return nil
 }
