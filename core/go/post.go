@@ -139,67 +139,62 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/post":
-		if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" {
-			if r.Method == "POST" {
-				id := r.FormValue("id")
-				action := r.FormValue("action")
-				fmt.Println(action)
-				switch action {
-				case "comment":
-					text := r.FormValue("comment")
-					if verifyCookie(r) {
-						p.IsConnected = true
-						p.User = userSession
-					} else {
-						p.IsConnected = false
-					}
-					err := insertComment(db, id, p.User.Username, text)
+		if r.Method == "POST" {
+			id := r.FormValue("id")
+			action := r.FormValue("action")
+			fmt.Println(action)
+			switch action {
+			case "comment":
+				text := r.FormValue("comment")
+				if verifyCookie(r) {
+					p.IsConnected = true
+					p.User = userSession
+				} else {
+					p.IsConnected = false
+				}
+				err := insertComment(db, id, p.User.Username, text)
+				if err != nil {
+					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
+					fmt.Println(err)
+					return
+				}
+			case "delete":
+				if verifyCookie(r) {
+					err := deletePostByID(db, id)
 					if err != nil {
-						http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
+						http.Error(w, "Erreur lors de la suppression du post", http.StatusInternalServerError)
 						fmt.Println(err)
 						return
 					}
-				case "delete":
-					if verifyCookie(r) {
-						err := deletePostByID(db, id)
-						if err != nil {
-							http.Error(w, "Erreur lors de la suppression du post", http.StatusInternalServerError)
-							fmt.Println(err)
-							return
-						}
-						http.Redirect(w, r, "/", http.StatusSeeOther)
+					http.Redirect(w, r, "/", http.StatusSeeOther)
+					return
+				}
+			case "deletecomment":
+				if verifyCookie(r) {
+					idcomment := r.FormValue("id")
+					idint, _ := strconv.Atoi(idcomment)
+					err := deleteCommentByID(db, idint)
+					if err != nil {
+						http.Error(w, "Erreur lors de la suppression du commentaire", http.StatusInternalServerError)
+						fmt.Println(err)
 						return
 					}
-				case "deletecomment":
-					if verifyCookie(r) {
-						idcomment := r.FormValue("id")
-						idint, _ := strconv.Atoi(idcomment)
-						err := deleteCommentByID(db, idint)
-						if err != nil {
-							http.Error(w, "Erreur lors de la suppression du commentaire", http.StatusInternalServerError)
-							fmt.Println(err)
-							return
-						}
-						http.Redirect(w, r, "/"+id, http.StatusSeeOther)
+					http.Redirect(w, r, "/"+id, http.StatusSeeOther)
+					return
+				}
+			case "report":
+				if verifyCookie(r) {
+					err := reportPostByID(db, id)
+					if err != nil {
+						http.Error(w, "Erreur lors du signalement du post", http.StatusInternalServerError)
+						fmt.Println(err)
 						return
 					}
-				case "report":
-					if verifyCookie(r) {
-						err := reportPostByID(db, id)
-						if err != nil {
-							http.Error(w, "Erreur lors du signalement du post", http.StatusInternalServerError)
-							fmt.Println(err)
-							return
-						}
-						http.Redirect(w, r, "/report", http.StatusSeeOther)
-						return
-					}
+					http.Redirect(w, r, "/report", http.StatusSeeOther)
+					return
 				}
 			}
-		} else {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
 		}
-
 		id := r.URL.Query().Get("id")
 		if id != "" {
 			post, err := GetPostByID(db, id)
@@ -223,74 +218,76 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
-			if verifyCookie(r) {
-				p.IsConnected = true
-				p.User = userSession
-			} else {
-				p.IsConnected = false
-			}
-			err := r.ParseForm()
-			if err != nil {
-				http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
-				return
-			}
-			p.post.Title = r.FormValue("title")
-			p.post.Text = r.FormValue("content")
-			categoryIDStr := r.FormValue("category")
-			categoryID, err := strconv.Atoi(categoryIDStr)
-			if err != nil {
-				http.Error(w, "ID de catégorie invalide", http.StatusBadRequest)
-				return
-			}
-
-			file, fileHeader, err := r.FormFile("image")
-			if err != nil && err != http.ErrMissingFile {
-				http.Error(w, "Erreur lors de la récupération du fichier", http.StatusInternalServerError)
-				return
-			}
-			if err == nil {
-				defer file.Close()
-
-				ext := filepath.Ext(fileHeader.Filename)
-				allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
-				if !allowedExts[ext] {
-					http.Error(w, "Extension de fichier non autorisée", http.StatusBadRequest)
-					return
+			if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" {
+				if verifyCookie(r) {
+					p.IsConnected = true
+					p.User = userSession
+				} else {
+					p.IsConnected = false
 				}
-
-				fileSize := fileHeader.Size
-				var maxFileSize int64 = 20 * 1024 * 1024
-				if fileSize > maxFileSize {
-					http.Error(w, "Image trop grande (max 20 Mo)", http.StatusBadRequest)
-					return
-				}
-
-				fileID, err := generateUniqueFilename(uploadPath, ext)
+				err := r.ParseForm()
 				if err != nil {
-					http.Error(w, "Erreur lors de la génération de l'ID de fichier unique", http.StatusInternalServerError)
+					http.Error(w, "Erreur lors de l'analyse du formulaire", http.StatusInternalServerError)
 					return
 				}
-
-				filePath := filepath.Join("databases/upload_image", fileID+ext)
-				outFile, err := os.Create(filePath)
+				p.post.Title = r.FormValue("title")
+				p.post.Text = r.FormValue("content")
+				categoryIDStr := r.FormValue("category")
+				categoryID, err := strconv.Atoi(categoryIDStr)
 				if err != nil {
-					http.Error(w, "Erreur lors de la création du fichier ", http.StatusInternalServerError)
+					http.Error(w, "ID de catégorie invalide", http.StatusBadRequest)
 					return
 				}
-				defer outFile.Close()
 
-				_, err = io.Copy(outFile, file)
+				file, fileHeader, err := r.FormFile("image")
+				if err != nil && err != http.ErrMissingFile {
+					http.Error(w, "Erreur lors de la récupération du fichier", http.StatusInternalServerError)
+					return
+				}
+				if err == nil {
+					defer file.Close()
+
+					ext := filepath.Ext(fileHeader.Filename)
+					allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
+					if !allowedExts[ext] {
+						http.Error(w, "Extension de fichier non autorisée", http.StatusBadRequest)
+						return
+					}
+
+					fileSize := fileHeader.Size
+					var maxFileSize int64 = 20 * 1024 * 1024
+					if fileSize > maxFileSize {
+						http.Error(w, "Image trop grande (max 20 Mo)", http.StatusBadRequest)
+						return
+					}
+
+					fileID, err := generateUniqueFilename(uploadPath, ext)
+					if err != nil {
+						http.Error(w, "Erreur lors de la génération de l'ID de fichier unique", http.StatusInternalServerError)
+						return
+					}
+
+					filePath := filepath.Join("databases/upload_image", fileID+ext)
+					outFile, err := os.Create(filePath)
+					if err != nil {
+						http.Error(w, "Erreur lors de la création du fichier ", http.StatusInternalServerError)
+						return
+					}
+					defer outFile.Close()
+
+					_, err = io.Copy(outFile, file)
+					if err != nil {
+						http.Error(w, "Erreur lors de la copie des données du fichier", http.StatusInternalServerError)
+						return
+					}
+
+					p.post.ImageURL = uploadPath + "/" + fileID + ext
+				}
+				err = insertPost(db, p.User.Username, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
 				if err != nil {
-					http.Error(w, "Erreur lors de la copie des données du fichier", http.StatusInternalServerError)
+					http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
 					return
 				}
-
-				p.post.ImageURL = uploadPath + "/" + fileID + ext
-			}
-			err = insertPost(db, p.User.Username, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
-			if err != nil {
-				http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
-				return
 			}
 
 			http.Redirect(w, r, "/", http.StatusFound)
