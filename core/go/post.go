@@ -330,6 +330,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					p.post.ImageURL = uploadPath + "/" + fileID + ext
 				}
 				err = insertPost(db, p.User.Username, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
+				p.post.ImageURL = ""
 				if err != nil {
 					http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)
 					return

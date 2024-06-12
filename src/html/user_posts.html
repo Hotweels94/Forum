@@ -9,8 +9,8 @@
 
 <body class="user-posts-page">
     <div class="user_posts_content">
+        <h1>Posts de : {{.User.Username}}</h1>
         {{range .Posts}}
-            <h1>Posts de : {{.User}}</h1>
             <a href="/post?id={{.ID}}" class="post-link">
                 <div class="post">
                     <h2>{{.Title}}</h2>

@@ -25,13 +25,14 @@
 
         <a href="/user_posts?username={{.User.Username}}"><button class="user_post_button">Mes posts</button></a>
 
-        <form action ="/profile" method="POST">
-            <button class ="logout-button" type="submit" name="action" value="logout">Déconnexion</button>
-        </form>
         <a href="/"><button class="acceuil_button_profile">Accueil</button></a>
         {{if eq .User.Role "admin"}}
             <a href="/panel_admin"><button class="panel_admin">Administration</button></a>
         {{end}}
+
+        <form action ="/profile" method="POST">
+            <button class ="logout-button" type="submit" name="action" value="logout">Déconnexion</button>
+        </form>
     </div>
 </body>
 </html>

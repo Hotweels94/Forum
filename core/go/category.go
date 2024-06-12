@@ -144,6 +144,7 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type list_Post struct {
 	Posts        []structs.Post
 	NameCategory string
+	User         structs.User
 }
 
 func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -166,14 +167,16 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if r.URL.Query().Get("username") != "" {
 			username := r.URL.Query().Get("username")
+			p.User.Username = username
 			posts, err = GetListPostByUsername(db, username)
+			p.Posts = posts.Posts
 			if err != nil {
 				http.Error(w, "Erreur lors de la récupération des posts de la liste de vos posts", http.StatusInternalServerError)
 				return
 			}
 		}
 		t, _ = template.ParseFiles("src/html/user_posts.html")
-		t.Execute(w, posts)
+		t.Execute(w, p)
 	default:
 		http.NotFound(w, r)
 	}
