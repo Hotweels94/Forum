@@ -224,7 +224,6 @@ body {
 }
 .list-categories-page {
     padding: 20px 80px;
-    text-align: center;
 }
 
 .list-categories h1 {
@@ -240,7 +239,6 @@ body {
 .category-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #333;
@@ -272,6 +270,7 @@ body {
 
 .delete-form {
     margin-left: 20px;
+    text-align: right;
 }
 
 .delete-button {
@@ -279,7 +278,7 @@ body {
     border: none;
     color: white;
     padding: 10px 20px;
-    text-align: center;
+    text-align: right;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
@@ -562,6 +561,7 @@ body {
     border-radius: 5px;
     background-color: #1f1f1f;
     transition: background-color 0.3s, box-shadow 0.3s;
+    text-align: left;
 }
 
 .post:hover {
@@ -589,7 +589,6 @@ body {
 /* List des categories */
 .list-categories-page {
     padding: 20px 80px;
-    text-align: center;
 }
 
 .list-categories h1 {
@@ -599,7 +598,6 @@ body {
 .category-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #333;
@@ -616,7 +614,7 @@ body {
     border: none;
     color: white;
     padding: 10px 20px;
-    text-align: center;
+    text-align: left;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
@@ -638,7 +636,7 @@ body {
     border: none;
     color: white;
     padding: 10px 20px;
-    text-align: center;
+    text-align: right;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
