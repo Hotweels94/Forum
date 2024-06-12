@@ -87,6 +87,21 @@ body {
     text-align: center;
 }
 
+.index-page h3 {
+    margin-top: 25px;
+}
+
+.image_promo {
+    width: 310px;
+    height: auto;
+}
+
+.image_promo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
 
 /*create post */
 
