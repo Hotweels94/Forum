@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"forum/core/structs"
 	"net/http"
@@ -42,7 +43,7 @@ func insertUser(db *sql.DB, email string, username string, password string, role
 	_, err = db.Exec("INSERT INTO users (email, username, password, role) VALUES(?, ?, ?, ?)", email, username, hashedPassword, role)
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE") {
-			fmt.Println("Username ou Email déjà connu.")
+			return errors.New("username ou email déjà connu")
 		} else {
 			fmt.Println(err)
 		}

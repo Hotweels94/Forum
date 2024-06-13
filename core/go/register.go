@@ -8,8 +8,9 @@ import (
 )
 
 type Register struct {
-	user        structs.User
-	isConnected bool
+	user         structs.User
+	isConnected  bool
+	ErrorMessage string
 }
 
 func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -20,23 +21,28 @@ func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	var t *template.Template
-	if r.URL.Path == "/register" {
-		if !verifyCookie(r) {
-			if r.Method == "POST" {
-				reg.user.Username = strings.TrimSpace(r.FormValue("username"))
-				reg.user.Email = strings.TrimSpace(r.FormValue("email"))
-				reg.user.Password = r.FormValue("password")
-				reg.user.Role = "user"
 
-				insertUser(db, reg.user.Email, reg.user.Username, reg.user.Password, reg.user.Role)
+	if !verifyCookie(r) {
+		if r.Method == "POST" {
+			reg.user.Username = strings.TrimSpace(r.FormValue("username"))
+			reg.user.Email = strings.TrimSpace(r.FormValue("email"))
+			reg.user.Password = r.FormValue("password")
+			reg.user.Role = "user"
+
+			reg.ErrorMessage = ""
+
+			err := insertUser(db, reg.user.Email, reg.user.Username, reg.user.Password, reg.user.Role)
+			if err != nil {
+				reg.ErrorMessage = err.Error()
+			} else {
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}
-		} else {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
 		}
 		t, _ = template.ParseFiles("src/html/register.html")
+		t.Execute(w, reg)
+	} else {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
-	t.Execute(w, reg)
 }

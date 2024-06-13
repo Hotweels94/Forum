@@ -16,6 +16,9 @@
             <input type="text" id="email" name="email" required><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
+            {{if .ErrorMessage}}
+                <h3 class = "error-message">{{.ErrorMessage}}</h3>
+            {{end}}
             <input class="register_button" type="submit" value="Register">
             <h4>Vous avez déjà un compte ? <a href="/login">Se connecter</a></h4>
         </form>
