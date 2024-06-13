@@ -21,6 +21,10 @@
                     {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
                         <a href="/post">Créer un post</a>
                     {{end}}
+
+                    {{if eq .User.Role "admin"}}
+                        <a href="/report">Posts Signalés</a>
+                    {{end}}
                 {{end}}
             </div>
             <div class="login-register">
