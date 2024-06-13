@@ -13,12 +13,14 @@
             <ul>
                 {{range .Posts}}
                     <li>
+                        <a href="/post?id={{.ID}}">
                         <h2>{{.Title}}</h2>
                         <p>Par : {{.User}}</p>
                         <p>{{.Text}}</p>
                         {{if .ImageURL}}
                             <img src="{{.ImageURL}}" alt="Image">
                         {{end}}
+                        </a>
                     </li>
                 {{end}}
             </ul>
