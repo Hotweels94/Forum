@@ -94,9 +94,23 @@ body {
 .image_promo {
     width: 310px;
     height: auto;
+    float: left;
 }
 
 .image_promo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.image_new {
+    width: 310px;
+    height: auto;
+    float: right;
+}
+
+.image_new img {
     width: 100%;
     height: 100%;
     object-fit: cover;
