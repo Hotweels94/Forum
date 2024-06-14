@@ -145,6 +145,7 @@ type list_Post struct {
 	Posts        []structs.Post
 	NameCategory string
 	User         structs.User
+	ListPostLike []structs.Post
 }
 
 func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -175,6 +176,18 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+
+		postLike, _ := getPostLikeByUsername(db, p.User.Username, true)
+
+		var listPostLike structs.Post
+		var PostsLike []structs.Post
+		for _, postLikeID := range postLike {
+			listPostLike, _ = GetPostByID(db, postLikeID.PostID)
+			PostsLike = append(PostsLike, listPostLike)
+		}
+		fmt.Println(PostsLike)
+		p.ListPostLike = PostsLike
+
 		t, _ = template.ParseFiles("src/html/user_posts.html")
 		t.Execute(w, p)
 	default:

@@ -17,6 +17,14 @@
                 </div>
             </a>
         {{end}}
+        <h1>Les likes de : {{.User.Username}}</h1>
+        {{range .ListPostLike}}
+            <a href="/post?id={{.ID}}" class="post-link">
+                <div class="post">
+                    <h2>{{.Title}}</h2>
+                </div>
+            </a>
+        {{end}}
     </div>
 </body>
 </html>
