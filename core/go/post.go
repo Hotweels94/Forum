@@ -361,6 +361,26 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			if verifyCookie(r) {
 				pp.IsConnected = true
+				cookie, err := getCookie(r, "session_token")
+				if err != nil {
+					if err == http.ErrNoCookie {
+						// If the cookie is not set, return an unauthorized status
+						w.WriteHeader(http.StatusUnauthorized)
+						fmt.Println(err)
+						return
+					}
+					// For any other type of error, return a bad request status
+					w.WriteHeader(http.StatusBadRequest)
+					fmt.Println(err)
+					return
+				}
+				sessionToken := cookie
+
+				userSession, exists = userSessions[sessionToken]
+				if !exists {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
 				pp.User = userSession
 			} else {
 				pp.IsConnected = false

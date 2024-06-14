@@ -31,6 +31,28 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		cookie, err := getCookie(r, "session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				// If the cookie is not set, return an unauthorized status
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Println(err)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Println(err)
+			return
+		}
+		sessionToken := cookie
+
+		userSession, exists = userSessions[sessionToken]
+		if !exists {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		a.User = userSession
+
 		a.ListUser = users
 
 		if r.Method == "POST" {

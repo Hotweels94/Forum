@@ -55,6 +55,26 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if verifyCookie(r) {
 		ch.IsConnected = true
+		cookie, err := getCookie(r, "session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				// If the cookie is not set, return an unauthorized status
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Println(err)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Println(err)
+			return
+		}
+		sessionToken := cookie
+
+		userSession, exists = userSessions[sessionToken]
+		if !exists {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		ch.User = userSession
 	} else {
 		ch.IsConnected = false
@@ -157,6 +177,30 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	var t *template.Template
+
+	if verifyCookie(r) {
+		cookie, err := getCookie(r, "session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				// If the cookie is not set, return an unauthorized status
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Println(err)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Println(err)
+			return
+		}
+		sessionToken := cookie
+
+		userSession, exists = userSessions[sessionToken]
+		if !exists {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		p.User = userSession
+	}
 
 	switch r.URL.Path {
 	case "/list_post":
