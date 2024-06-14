@@ -52,11 +52,8 @@ type Category struct {
 }
 
 type Like struct {
+	ID     int
 	PostID string
 	User   string
-}
-
-type Dislike struct {
-	PostID string
-	User   string
+	IsLike bool
 }

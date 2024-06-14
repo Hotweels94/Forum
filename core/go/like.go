@@ -2,6 +2,7 @@ package forum
 
 import (
 	"database/sql"
+	"forum/core/structs"
 )
 
 func initDBlike(db *sql.DB) error {
@@ -87,4 +88,36 @@ func updateLikeUseranem(db *sql.DB, old_username string, new_username string) er
 		return err
 	}
 	return nil
+}
+
+func getPostLikeByUsername(db *sql.DB, userName string, islike bool) ([]structs.Like, error) {
+	query := `
+	SELECT id, post_id, user_name, is_like
+	FROM like
+	WHERE user_name = ?
+	`
+
+	rows, err := db.Query(query, userName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var likes []structs.Like
+	for rows.Next() {
+		var like structs.Like
+		err := rows.Scan(&like.ID, &like.PostID, &like.User, &like.IsLike)
+		if err != nil {
+			return nil, err
+		}
+		if islike == like.IsLike {
+			likes = append(likes, like)
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return likes, nil
 }
