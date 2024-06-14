@@ -40,8 +40,8 @@ func insertLike(db *sql.DB, post_id string, user_name string, is_like bool) erro
 	return nil
 }
 
-func deleteLike(db *sql.DB, post_id string, user_name string) error {
-	_, err := db.Exec("DELETE FROM like WHERE post_id = ? AND user_name = ?", post_id, user_name)
+func deleteLike(db *sql.DB, post_id string) error {
+	_, err := db.Exec("DELETE FROM like WHERE post_id = ?", post_id)
 	if err != nil {
 		return err
 	}

@@ -425,6 +425,7 @@ func getCategories(db *sql.DB) ([]structs.Category, error) {
 func deletePostByID(db *sql.DB, id string) error {
 	_, err := db.Exec("DELETE FROM post WHERE id = ?", id)
 	deleteCommentByPostID(db, id)
+	deleteLike(db, id)
 	return err
 }
 
