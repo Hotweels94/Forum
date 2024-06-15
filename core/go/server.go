@@ -20,7 +20,7 @@ type mainInfo struct {
 // ServeHTTP handles the HTTP requests for the mainInfo struct
 func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	// Initialisation of the database
+	// initialization of the database
 	db, err := initDB()
 	if err != nil {
 		return

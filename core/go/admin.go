@@ -14,7 +14,8 @@ type Admin struct {
 
 // ServeHTTP handles the HTTP requests for the Admin struct
 func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Initialisation of the database
+
+	// initialization of the database
 	db, err := initDB()
 	if err != nil {
 		return
@@ -25,7 +26,7 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// We verify if th user is connected and has cookie
 	if verifyCookie(r) {
-		a.User = userSession
+		// We get the list of all created users in the database
 		users, err := getAllUsers(db)
 
 		if err != nil {

@@ -18,7 +18,7 @@ var exists bool
 // ServeHTTP handles the HTTP requests for the Profil struct
 func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	// Initialisation of the database
+	// initialization of the database
 	db, err := initDB()
 	if err != nil {
 		return

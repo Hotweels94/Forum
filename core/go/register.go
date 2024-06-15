@@ -15,7 +15,7 @@ type Register struct {
 // ServeHTTP handles the HTTP requests for the Register struct
 func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	// Initialisation of the database
+	// initialization of the database
 	db, err := initDB()
 	if err != nil {
 		return
