@@ -9,11 +9,13 @@ import (
 
 type Register struct {
 	user         structs.User
-	isConnected  bool
 	ErrorMessage string
 }
 
+// ServeHTTP handles the HTTP requests for the Register struct
 func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	// Initialisation of the database
 	db, err := initDB()
 	if err != nil {
 		return
@@ -22,8 +24,10 @@ func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var t *template.Template
 
+	// If the user doesn't have cookie
 	if !verifyCookie(r) {
 		if r.Method == "POST" {
+			// We get the data from user when he register
 			reg.user.Username = strings.TrimSpace(r.FormValue("username"))
 			reg.user.Email = strings.TrimSpace(r.FormValue("email"))
 			reg.user.Password = r.FormValue("password")
@@ -31,6 +35,7 @@ func (reg *Register) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			reg.ErrorMessage = ""
 
+			// We insert the user data in the database
 			err := insertUser(db, reg.user.Email, reg.user.Username, reg.user.Password, reg.user.Role)
 			if err != nil {
 				reg.ErrorMessage = err.Error()

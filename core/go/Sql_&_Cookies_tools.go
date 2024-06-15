@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Function to Create / initialize the dtabase
 func initDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./databases/forum.db")
 	if err != nil {
@@ -34,7 +35,9 @@ func initDB() (*sql.DB, error) {
 	return db, nil
 }
 
+// Function to insert user data in the database
 func insertUser(db *sql.DB, email string, username string, password string, role string) error {
+	// We hash the password for more security
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -51,6 +54,7 @@ func insertUser(db *sql.DB, email string, username string, password string, role
 	return err
 }
 
+// Function to verify user data when he login
 func verifyLog(db *sql.DB, username string, email string, password string) (structs.User, error) {
 	var hashedPassword string
 	var userData structs.User
@@ -58,10 +62,12 @@ func verifyLog(db *sql.DB, username string, email string, password string) (stru
 	if err != nil {
 		return userData, err
 	}
+	// We compare the hash to the real password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return userData, err
 }
 
+// Function to get the username from the database
 func getUsername(db *sql.DB, username string) string {
 	var userData structs.User
 	err := db.QueryRow("SELECT username FROM users WHERE username = ?", username).Scan(&userData.Username)
@@ -71,6 +77,7 @@ func getUsername(db *sql.DB, username string) string {
 	return userData.Username
 }
 
+// Function to get the email from the database
 func getEmail(db *sql.DB, email string) string {
 	var userData structs.User
 	err := db.QueryRow("SELECT email FROM users WHERE email = ?", email).Scan(&userData.Email)
@@ -80,6 +87,7 @@ func getEmail(db *sql.DB, email string) string {
 	return userData.Email
 }
 
+// Function to get the role from the database
 func getRole(db *sql.DB, username string) string {
 	var userData structs.User
 	err := db.QueryRow("SELECT role FROM users WHERE username = ?", username).Scan(&userData.Role)
@@ -89,6 +97,7 @@ func getRole(db *sql.DB, username string) string {
 	return userData.Role
 }
 
+// Function to get all of the users data from the database
 func getAllUsers(db *sql.DB) ([]structs.User, error) {
 	rows, err := db.Query("SELECT username, role FROM users")
 	if err != nil {
@@ -111,6 +120,7 @@ func getAllUsers(db *sql.DB) ([]structs.User, error) {
 	return users, nil
 }
 
+// Function to modify the username from the database
 func modifyUsername(db *sql.DB, newUsername string, oldUsername string) error {
 	_, err := db.Exec("UPDATE users SET username = ? WHERE username = ?", newUsername, oldUsername)
 	if err != nil {
@@ -154,6 +164,7 @@ func updateCommentsUsername(db *sql.DB, newUsername string, oldUsername string) 
 	return nil
 }
 
+// Function to modify the email from the database
 func modifyEmail(db *sql.DB, newEmail string, oldEmail string) error {
 	_, err := db.Exec("UPDATE users SET email = ? WHERE email = ?", newEmail, oldEmail)
 	if err != nil {
@@ -162,6 +173,7 @@ func modifyEmail(db *sql.DB, newEmail string, oldEmail string) error {
 	return err
 }
 
+// Function to modify the role from the database
 func modifyRole(db *sql.DB, username string) error {
 	var currentRole string
 	err := db.QueryRow("SELECT role FROM users WHERE username = ?", username).Scan(&currentRole)
@@ -188,6 +200,7 @@ func modifyRole(db *sql.DB, username string) error {
 	return nil
 }
 
+// Function to delete the email from the database
 func deleteRole(db *sql.DB, username string, role string) error {
 	_, err := db.Exec("UPDATE users SET role = ? WHERE username = ?", role, username)
 	if err != nil {
@@ -196,6 +209,7 @@ func deleteRole(db *sql.DB, username string, role string) error {
 	return err
 }
 
+// Function to get the list of post compared to a username
 func GetListPostByUsername(db *sql.DB, username string) (list_Post, error) {
 	var listPost list_Post
 
@@ -223,18 +237,20 @@ func GetListPostByUsername(db *sql.DB, username string) (list_Post, error) {
 	return listPost, nil
 }
 
+// Function to create a cookie
 func CreateCookie(w http.ResponseWriter, name string, value string) {
 	cookie := &http.Cookie{
 		Name:     name,
 		Value:    value,
-		Path:     "/",
-		MaxAge:   86400,
-		HttpOnly: true,
-		Secure:   true,
+		Path:     "/",   // For all of the pages
+		MaxAge:   86400, // For 1 day (86400 sec = 1 day)
+		HttpOnly: true,  // Prevents JS code from accessing cookies carrying this notion
+		Secure:   true,  // Cookies bearing the Secure flag are only sent if the request is https;
 	}
 	http.SetCookie(w, cookie)
 }
 
+// Function to delete a cookie
 func DeleteCookie(w http.ResponseWriter, name string) {
 	cookie := &http.Cookie{
 		Name:     name,
@@ -247,6 +263,7 @@ func DeleteCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, cookie)
 }
 
+// Function to get a cookie
 func getCookie(r *http.Request, name string) (string, error) {
 	cookie, err := r.Cookie(name)
 	if err != nil {
@@ -255,6 +272,7 @@ func getCookie(r *http.Request, name string) (string, error) {
 	return cookie.Value, err
 }
 
+// Function to verify if the user has a cookie
 func verifyCookie(r *http.Request) bool {
 	cookie, err := getCookie(r, "session_token")
 	if len(cookie) == 0 || err != nil {

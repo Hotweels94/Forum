@@ -12,7 +12,9 @@ type Admin struct {
 	ListUser []structs.User
 }
 
+// ServeHTTP handles the HTTP requests for the Admin struct
 func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Initialisation of the database
 	db, err := initDB()
 	if err != nil {
 		return
@@ -21,6 +23,7 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var t *template.Template
 
+	// We verify if th user is connected and has cookie
 	if verifyCookie(r) {
 		a.User = userSession
 		users, err := getAllUsers(db)
@@ -31,6 +34,7 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// We get the cookie
 		cookie, err := getCookie(r, "session_token")
 		if err != nil {
 			if err == http.ErrNoCookie {
@@ -44,8 +48,10 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			return
 		}
+		// Get the session Token from the cookie
 		sessionToken := cookie
 
+		// Verify if the session user exist in the map of user Sessions
 		userSession, exists = userSessions[sessionToken]
 		if !exists {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -55,8 +61,10 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		a.ListUser = users
 
+		// Processes POST requests to change a user's role
 		if r.Method == "POST" {
 			action := r.FormValue("action")
+			// If the action if modify_role, it change the role of the user in the database
 			if action == "modify_role" {
 				username := r.FormValue("username")
 				err := modifyRole(db, username)
@@ -69,9 +77,9 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-
+		// If the user is not connected, he is redirected to the main page
 	} else {
-		http.Redirect(w, r, "/profile", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 

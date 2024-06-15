@@ -11,6 +11,7 @@
         <h1>Vous êtes connecté {{.User.Username}}</h1>
         <h2>Votre email : {{.User.Email}}</h2>
 
+        <!-- Part to modify data -->
         <div class="modify_profile">
             <form action="/profile" method="POST">
                 <h3>Modification d'informations :</h3>
@@ -23,13 +24,18 @@
             </form>
         </div>
 
+        <!-- Button to the the post from the connected user -->
         <a href="/user_posts?username={{.User.Username}}"><button class="user_post_button">Mes posts</button></a>
 
+        <!-- Button to go back to home -->
         <a href="/"><button class="acceuil_button_profile">Accueil</button></a>
+
+        <!-- If the user is an admin he can go to the admin panel -->
         {{if eq .User.Role "admin"}}
             <a href="/panel_admin"><button class="panel_admin">Administration</button></a>
         {{end}}
 
+        <!-- Button to disconnect -->
         <form action ="/profile" method="POST">
             <button class ="logout-button" type="submit" name="action" value="logout">Déconnexion</button>
         </form>

@@ -17,14 +17,17 @@ type mainInfo struct {
 	IsConnected   bool
 }
 
+// ServeHTTP handles the HTTP requests for the mainInfo struct
 func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
+	// Initialisation of the database
 	db, err := initDB()
 	if err != nil {
 		return
 	}
 	defer db.Close()
 
+	// We verify if th user is connected and has cookie
 	if verifyCookie(r) {
 		m.IsConnected = true
 		cookie, err := getCookie(r, "session_token")
@@ -40,8 +43,10 @@ func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			return
 		}
+		// Get the session Token from the cookie
 		sessionToken := cookie
 
+		// Verify if the session user exist in the map of user Sessions
 		userSession, exists = userSessions[sessionToken]
 		if !exists {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -59,6 +64,7 @@ func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// HandleForum handles the routing and server configuration for the forum
 func HandleForum() {
 
 	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("src"))))
@@ -75,5 +81,7 @@ func HandleForum() {
 	http.Handle("/panel_admin", new(Admin))
 	http.Handle("/report", new(Posts))
 	http.Handle("/user_posts", new(list_Post))
+
+	// Start the server and listen on port 8080
 	http.ListenAndServe(":8080", nil)
 }

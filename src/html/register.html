@@ -10,16 +10,22 @@
     <div class="register_page">
         <h1>Create an Account</h1>
         <form method="post" action="/register">
+            <!-- Send data to the server -->
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br>
             <label for="email">Email:</label>
             <input type="text" id="email" name="email" required><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
+
+            <!-- If the username or email is already in the database, we print an error message -->
             {{if .ErrorMessage}}
                 <h3 class = "error-message">{{.ErrorMessage}}</h3>
             {{end}}
+            <!-- Button to register -->
             <input class="register_button" type="submit" value="Register">
+
+            <!-- Button to go to login page -->
             <h4>Vous avez déjà un compte ? <a href="/login">Se connecter</a></h4>
         </form>
     </div>

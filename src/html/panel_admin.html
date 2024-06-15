@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body class="panel-admin-page">
+    <!-- If the user is an Admin he can see this page to change user role-->
     {{if eq .User.Role "admin"}}
     <h1>Changement de Rôles</h1>
         {{range .ListUser}}
