@@ -136,6 +136,28 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if verifyCookie(r) {
 		pageData.IsConnected = true
+		cookie, err := getCookie(r, "session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				// If the cookie is not set, return an unauthorized status
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Println(err)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Println(err)
+			return
+		}
+		// Get the session Token from the cookie
+		sessionToken := cookie
+
+		// Verify if the session user exist in the map of user Sessions
+		userSession, exists = userSessions[sessionToken]
+		if !exists {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		pageData.User = userSession
 	} else {
 		pageData.IsConnected = false
