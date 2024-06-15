@@ -9,11 +9,13 @@ type ReportedPosts struct {
 	Posts []structs.Post
 }
 
+// update to set a post reported
 func reportPostByID(db *sql.DB, id string) error {
 	_, err := db.Exec("UPDATE post SET reported = 1 WHERE id = ?", id)
 	return err
 }
 
+// get all reported posts
 func getReportedPosts(db *sql.DB) ([]structs.Post, error) {
 	rows, err := db.Query("SELECT id, user, text, title, imageURL, category_id FROM post WHERE reported = 1")
 	if err != nil {

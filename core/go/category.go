@@ -15,6 +15,7 @@ type Categories struct {
 	IsConnected bool
 }
 
+// initDBCategory creates the category table in the database if it does not exist
 func initDBCategory() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./databases/forum.db")
 	if err != nil {
@@ -36,6 +37,7 @@ func initDBCategory() (*sql.DB, error) {
 	return db, nil
 }
 
+// insert in the db a category
 func insertCategory(db *sql.DB, name string, description string) error {
 	_, err := db.Exec("INSERT INTO category (name, description) VALUES(?, ?)", name, description)
 	if err != nil {
@@ -45,6 +47,7 @@ func insertCategory(db *sql.DB, name string, description string) error {
 	return nil
 }
 
+// ServeHTTP handles the HTTP requests for the categories struct
 func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBCategory()
 	if err != nil {
@@ -82,6 +85,8 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/category":
+
+		// get all post from a category
 		if r.URL.Query().Get("id") != "" {
 			id := r.URL.Query().Get("id")
 			idint, _ := strconv.Atoi(id)
@@ -93,6 +98,7 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			t, _ := template.ParseFiles("src/html/list_post.html")
 			t.Execute(w, posts)
 		} else if ch.User.Role == "admin" || ch.User.Role == "moderator" || ch.User.Role == "user" {
+			// insert a category in the db if got the right rank
 			if r.Method == "POST" {
 				err := r.ParseForm()
 				if err != nil {
@@ -117,6 +123,7 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
 
+		// get all categories in the db
 	case "/list_category":
 		if r.Method == "POST" {
 			action := r.FormValue("action")
@@ -161,6 +168,7 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// create a new struct for all needs of the html page
 type list_Post struct {
 	Posts        []structs.Post
 	NameCategory string
@@ -168,6 +176,7 @@ type list_Post struct {
 	ListPostLike []structs.Post
 }
 
+// ServeHTTP handles the HTTP requests for the list_Post struct
 func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBPost()
 	if err != nil {
@@ -203,10 +212,6 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.URL.Path {
-	case "/list_post":
-		t, _ = template.ParseFiles("src/html/list_post.html")
-		t.Execute(w, nil)
-		return
 	case "/user_posts":
 		var posts list_Post
 
@@ -239,6 +244,7 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// get all post from a category
 func GetListPostByCategoryID(db *sql.DB, categoryID int) (list_Post, error) {
 	var listPost list_Post
 
@@ -275,6 +281,7 @@ func GetListPostByCategoryID(db *sql.DB, categoryID int) (list_Post, error) {
 	return listPost, nil
 }
 
+// delete the category and all the post in it
 func deleteCategory(db *sql.DB, id int) error {
 
 	posts, err := GetListPostByCategoryID(db, id)

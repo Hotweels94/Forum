@@ -21,6 +21,7 @@ type Posts struct {
 	IsConnected bool
 }
 
+// inirt the db post comment and like
 func initDBPost() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "./databases/forum.db")
 	if err != nil {
@@ -68,6 +69,7 @@ func initDBComment(db *sql.DB) error {
 	return err
 }
 
+// insert in the db a post
 func insertPost(db *sql.DB, user string, text string, title string, imageURL string, categoryID int) error {
 	id, err := uuid.NewV4()
 	if err != nil {
@@ -82,6 +84,7 @@ func insertPost(db *sql.DB, user string, text string, title string, imageURL str
 	return nil
 }
 
+// get all informations of a post by id
 func GetPostByID(db *sql.DB, id string) (structs.Post, error) {
 	var post structs.Post
 	err := db.QueryRow("SELECT id, user, text, title, imageURL FROM post WHERE id = ?", id).Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL)
@@ -91,6 +94,7 @@ func GetPostByID(db *sql.DB, id string) (structs.Post, error) {
 	return post, nil
 }
 
+// add a comment to a post
 func insertComment(db *sql.DB, postID, user, text string) error {
 	_, err := db.Exec("INSERT INTO comment (post_id, user, text) VALUES (?, ?, ?)", postID, user, text)
 	if err != nil {
@@ -99,6 +103,7 @@ func insertComment(db *sql.DB, postID, user, text string) error {
 	return nil
 }
 
+// get all comments of a post
 func getCommentsByPostID(db *sql.DB, postID string) ([]structs.Comment, error) {
 	rows, err := db.Query("SELECT id, post_id, user, text FROM comment WHERE post_id = ?", postID)
 	if err != nil {
@@ -123,6 +128,7 @@ func getCommentsByPostID(db *sql.DB, postID string) ([]structs.Comment, error) {
 
 const uploadPath = "/databases/upload_image"
 
+// ServerHTTP for the post
 func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db, err := initDBPost()
 	err2 := initDBComment(db)
@@ -166,11 +172,13 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/post":
 		if r.Method == "POST" {
+			// display the post and the comments
 			id := r.FormValue("id")
 			action := r.FormValue("action")
 			fmt.Println(action)
 			switch action {
 			case "comment":
+				// button for add a comment
 				text := r.FormValue("comment")
 				if verifyCookie(r) {
 					p.IsConnected = true
@@ -185,6 +193,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			case "delete":
+				// button for delete a post
 				if verifyCookie(r) {
 					err := deletePostByID(db, id)
 					if err != nil {
@@ -196,6 +205,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			case "deletecomment":
+				// button for delete a comment
 				if verifyCookie(r) {
 					idcomment := r.FormValue("id")
 					idint, _ := strconv.Atoi(idcomment)
@@ -209,6 +219,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			case "report":
+				// button for report a post
 				if verifyCookie(r) {
 					err := reportPostByID(db, id)
 					if err != nil {
@@ -220,6 +231,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			case "dislike":
+				// button for dislike a post
 				if verifyCookie(r) {
 					p.IsConnected = true
 					p.User = userSession
@@ -235,6 +247,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "/post?id="+id, http.StatusSeeOther)
 				return
 			case "like":
+				// button for like a post
 				if verifyCookie(r) {
 					p.IsConnected = true
 					p.User = userSession
@@ -253,6 +266,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		id := r.URL.Query().Get("id")
 		if id != "" {
+			// get all informations of a post
 			post, err := GetPostByID(db, id)
 			if err != nil {
 				http.Error(w, "Erreur lors de la récupération du post", http.StatusInternalServerError)
@@ -286,6 +300,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
+			// insert a post in the db
 			if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" { //double check useless
 				if verifyCookie(r) {
 					p.IsConnected = true
@@ -306,7 +321,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, "ID de catégorie invalide", http.StatusBadRequest)
 					return
 				}
-
+				// Check if the category exists
 				file, fileHeader, err := r.FormFile("image")
 				if err != nil && err != http.ErrMissingFile {
 					http.Error(w, "Erreur lors de la récupération du fichier", http.StatusInternalServerError)
@@ -316,25 +331,26 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					defer file.Close()
 
 					ext := filepath.Ext(fileHeader.Filename)
+					// Check if the file extension is allowed
 					allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true}
 					if !allowedExts[ext] {
 						http.Error(w, "Extension de fichier non autorisée", http.StatusBadRequest)
 						return
 					}
-
+					// Check if the file size is allowed
 					fileSize := fileHeader.Size
 					var maxFileSize int64 = 20 * 1024 * 1024
 					if fileSize > maxFileSize {
 						http.Error(w, "Image trop grande (max 20 Mo)", http.StatusBadRequest)
 						return
 					}
-
+					// Generate a unique filename by appending an UUID to the upload path
 					fileID, err := generateUniqueFilename(uploadPath, ext)
 					if err != nil {
 						http.Error(w, "Erreur lors de la génération de l'ID de fichier unique", http.StatusInternalServerError)
 						return
 					}
-
+					// Create the file on the server
 					filePath := filepath.Join("databases/upload_image", fileID+ext)
 					outFile, err := os.Create(filePath)
 					if err != nil {
@@ -342,7 +358,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					defer outFile.Close()
-
 					_, err = io.Copy(outFile, file)
 					if err != nil {
 						http.Error(w, "Erreur lors de la copie des données du fichier", http.StatusInternalServerError)
@@ -358,11 +373,11 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 		if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" {
+			// get all categories to create a post in good category
 			categories, err := getCategories(db)
 			if err != nil {
 				http.Error(w, "Erreur lors de la récupération des catégories", http.StatusInternalServerError)
@@ -413,6 +428,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "/report":
+		// see all reported post
 		reportedPosts, err := getReportedPosts(db)
 		if err != nil {
 			http.Error(w, "Erreur lors de la récupération des posts signalés", http.StatusInternalServerError)
@@ -426,6 +442,7 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// generate a unique filename by using an UUID
 func generateUniqueFilename(uploadPath string, ext string) (string, error) {
 	for i := 0; i < 100; i++ {
 		id, err := uuid.NewV4()
@@ -442,6 +459,7 @@ func generateUniqueFilename(uploadPath string, ext string) (string, error) {
 	return "", errors.New("failed to generate unique filename")
 }
 
+// get all categories from the db
 func getCategories(db *sql.DB) ([]structs.Category, error) {
 	rows, err := db.Query("SELECT id, name, description FROM category")
 	if err != nil {
@@ -464,6 +482,7 @@ func getCategories(db *sql.DB) ([]structs.Category, error) {
 	return categories, nil
 }
 
+// delete a post by id and delete all comments and likes of this post
 func deletePostByID(db *sql.DB, id string) error {
 	_, err := db.Exec("DELETE FROM post WHERE id = ?", id)
 	deleteCommentByPostID(db, id)
@@ -471,11 +490,13 @@ func deletePostByID(db *sql.DB, id string) error {
 	return err
 }
 
+// delete a comment by his id
 func deleteCommentByID(db *sql.DB, id int) error {
 	_, err := db.Exec("DELETE FROM comment WHERE id = ?", id)
 	return err
 }
 
+// delete all comment by post id
 func deleteCommentByPostID(db *sql.DB, id string) error {
 	_, err := db.Exec("DELETE FROM comment WHERE post_id = ?", id)
 	return err

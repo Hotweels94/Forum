@@ -21,6 +21,7 @@ func initDBlike(db *sql.DB) error {
 	return nil
 }
 
+// inster in the db like and dislike
 func insertLike(db *sql.DB, post_id string, user_name string, is_like bool) error {
 	var exists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM like WHERE post_id = ? AND user_name = ? AND is_like = ?)", post_id, user_name, is_like).Scan(&exists)
@@ -40,6 +41,7 @@ func insertLike(db *sql.DB, post_id string, user_name string, is_like bool) erro
 	return nil
 }
 
+// delete like and dislike of a post
 func deleteLike(db *sql.DB, post_id string) error {
 	_, err := db.Exec("DELETE FROM like WHERE post_id = ?", post_id)
 	if err != nil {
@@ -48,6 +50,7 @@ func deleteLike(db *sql.DB, post_id string) error {
 	return nil
 }
 
+// count like of a post
 func countLike(db *sql.DB, post_id string) (int, error) {
 	rows, err := db.Query("SELECT COUNT(*) FROM like WHERE post_id = ? AND is_like = 1", post_id)
 	if err != nil {
@@ -65,6 +68,7 @@ func countLike(db *sql.DB, post_id string) (int, error) {
 	return count, nil
 }
 
+// count dislike of a post
 func countDislike(db *sql.DB, post_id string) (int, error) {
 	rows, err := db.Query("SELECT COUNT(*) FROM like WHERE post_id = ? AND is_like = 0", post_id)
 	if err != nil {
@@ -82,6 +86,7 @@ func countDislike(db *sql.DB, post_id string) (int, error) {
 	return count, nil
 }
 
+// update the username while modifying by the user
 func updateLikeUseranem(db *sql.DB, old_username string, new_username string) error {
 	_, err := db.Exec("UPDATE like SET user_name = ? WHERE user_name = ?", new_username, old_username)
 	if err != nil {
@@ -90,6 +95,7 @@ func updateLikeUseranem(db *sql.DB, old_username string, new_username string) er
 	return nil
 }
 
+// get all like from a user
 func getPostLikeByUsername(db *sql.DB, userName string, islike bool) ([]structs.Like, error) {
 	query := `
 	SELECT id, post_id, user_name, is_like
