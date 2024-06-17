@@ -56,6 +56,7 @@ func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		m.IsConnected = false
 	}
 
+	// Get the recent post
 	var posts list_Post
 
 	posts, _ = GetListRecentPost(db)
