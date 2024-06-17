@@ -62,6 +62,7 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		a.User = userSession
 
 		a.ListUser = users
+		a.IsConnected = true
 
 		// Processes POST requests to change a user's role
 		if r.Method == "POST" {

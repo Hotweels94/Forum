@@ -53,6 +53,7 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+		p.IsConnected = true
 		p.User = userSession
 
 		if r.Method == "POST" {
@@ -88,6 +89,7 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
+		p.IsConnected = false
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}

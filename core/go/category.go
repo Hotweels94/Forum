@@ -287,6 +287,7 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
+			p.IsConnected = true
 			p.User = userSession
 		} else {
 			p.IsConnected = false
