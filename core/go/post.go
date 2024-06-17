@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
@@ -37,6 +38,7 @@ func initDBPost() (*sql.DB, error) {
             imageURL TEXT,
             category_id INTEGER NOT NULL,
             reported INTEGER DEFAULT 0,
+			date TEXT NOT NULL,
             UNIQUE(id)
         )
     `)
@@ -63,6 +65,7 @@ func initDBComment(db *sql.DB) error {
             post_id TEXT NOT NULL,
             user TEXT NOT NULL,
             text TEXT NOT NULL,
+			date TEXT NOT NULL,
             FOREIGN KEY (post_id) REFERENCES post(id)
         )
     `)
@@ -70,13 +73,13 @@ func initDBComment(db *sql.DB) error {
 }
 
 // insert in the db a post
-func insertPost(db *sql.DB, user string, text string, title string, imageURL string, categoryID int) error {
+func insertPost(db *sql.DB, user string, text string, title string, imageURL string, categoryID int, date string) error {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO post (id, user, text, title, imageURL, category_id) VALUES(?, ?, ?, ?, ?, ?)", id.String(), user, text, title, imageURL, categoryID)
+	_, err = db.Exec("INSERT INTO post (id, user, text, title, imageURL, category_id, date) VALUES(?, ?, ?, ?, ?, ?,?)", id.String(), user, text, title, imageURL, categoryID, date)
 	if err != nil {
 		return err
 	}
@@ -95,8 +98,8 @@ func GetPostByID(db *sql.DB, id string) (structs.Post, error) {
 }
 
 // add a comment to a post
-func insertComment(db *sql.DB, postID, user, text string) error {
-	_, err := db.Exec("INSERT INTO comment (post_id, user, text) VALUES (?, ?, ?)", postID, user, text)
+func insertComment(db *sql.DB, postID, user, text string, date string) error {
+	_, err := db.Exec("INSERT INTO comment (post_id, user, text, date) VALUES (?, ?, ?, ?)", postID, user, text, date)
 	if err != nil {
 		return err
 	}
@@ -186,7 +189,9 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				} else {
 					p.IsConnected = false
 				}
-				err := insertComment(db, id, p.User.Username, text)
+				currentTime := time.Now()
+				datecomment := currentTime.Format("2006-01-02 15:04:05")
+				err := insertComment(db, id, p.User.Username, text, datecomment)
 				if err != nil {
 					http.Error(w, "Erreur lors de l'insertion du commentaire ", http.StatusInternalServerError)
 					fmt.Println(err)
@@ -366,7 +371,10 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					p.post.ImageURL = uploadPath + "/" + fileID + ext
 				}
-				err = insertPost(db, p.User.Username, p.post.Text, p.post.Title, p.post.ImageURL, categoryID)
+				// get the current date
+				currentTime := time.Now()
+				date := currentTime.Format("2006-01-02 15:04:05")
+				err = insertPost(db, p.User.Username, p.post.Text, p.post.Title, p.post.ImageURL, categoryID, date)
 				p.post.ImageURL = ""
 				if err != nil {
 					http.Error(w, "Erreur lors de l'insertion du post dans la base de données", http.StatusInternalServerError)

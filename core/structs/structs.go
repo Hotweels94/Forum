@@ -15,6 +15,7 @@ type Post struct {
 	Title            string
 	ImageURL         string
 	SelectedCategory int
+	Date             string
 }
 
 type PostPage struct {
@@ -29,6 +30,7 @@ type Comment struct {
 	PostID string
 	User   string
 	Text   string
+	Date   string
 }
 
 type PostWithComments struct {
