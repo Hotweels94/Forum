@@ -37,24 +37,44 @@
             </div>
         </nav>
         <!-- End Top bar -->
-        <h1>Forum Jeux Vidéo !</h1>
-        <h2>{{ .PageName }}</h2>
+        <h1>Forum Jeux Vidéo</h1>
 
-        <div class="image_promo">
-            <h3>Achetez vos jeux moins chère !</h3>
-            <h4>Promotions Steam :</h4>
-            <a href="https://store.steampowered.com/specials#tab=TopSellers" target="_blank"><img src="/src/image/Soldes_steam.jpg" alt="Image"></a>
-            <h4>Instant Gaming :</h4>
-            <a href="https://www.instant-gaming.com/fr/" target="_blank"><img src="/src/image/instantGaming.jpg" alt="Image"></a>
+        <div class="Last-Post">
+            <h2>Les derniers Posts</h2>
         </div>
 
-        <div class="image_new">
-            <h3>Les dernières nouveautés !</h3>
-            <h4>Steam :</h4>
-            <a href="https://store.steampowered.com/explore/new/" target="_blank"><img src="/src/image/Steam_new.jpg" alt="Image"></a>
-            <h4>Playstation :</h4>
-            <a href="https://store.playstation.com/fr-fr/pages/latest" target="_blank"><img src="/src/image/PlaystationStore.jpg" alt="Image"></a>
+        <!-- Content of the main page -->
+        <div class ="content">
+            <div class="image_promo">
+                <h3>Achetez vos jeux moins chère !</h3>
+                <h4>Promotions Steam :</h4>
+                <a href="https://store.steampowered.com/specials#tab=TopSellers" target="_blank"><img src="/src/image/Soldes_steam.jpg" alt="Image"></a>
+                <h4>Instant Gaming :</h4>
+                <a href="https://www.instant-gaming.com/fr/" target="_blank"><img src="/src/image/instantGaming.jpg" alt="Image"></a>
+            </div>
+
+            <div class="Recent-Post">
+                {{range .ListRecentPosts}}
+                    <a href="/post?id={{.ID}}" class="post-link">
+                        <div class="post">
+                            <h2>{{.Title}}</h2>
+                            {{if .ImageURL}}
+                                <img src="{{.ImageURL}}" alt="">
+                            {{end}}
+                        </div>
+                    </a>
+                {{end}}
+            </div>
+
+            <div class="image_new">
+                <h3>Les dernières nouveautés !</h3>
+                <h4>Steam :</h4>
+                <a href="https://store.steampowered.com/explore/new/" target="_blank"><img src="/src/image/Steam_new.jpg" alt="Image"></a>
+                <h4>Playstation :</h4>
+                <a href="https://store.playstation.com/fr-fr/pages/latest" target="_blank"><img src="/src/image/PlaystationStore.jpg" alt="Image"></a>
+            </div>
         </div>
+        <!-- End of Content of the main page -->
 
     </section>  
 </body>

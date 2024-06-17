@@ -5,16 +5,15 @@ import (
 	"forum/core/structs"
 	"html/template"
 	"net/http"
-	"strconv"
 )
 
 // http://localhost:8080/ -> Forum Jeux video
 
 type mainInfo struct {
-	PageName      string
-	NumberOfVisit int
-	User          structs.User
-	IsConnected   bool
+	PageName        string
+	User            structs.User
+	IsConnected     bool
+	ListRecentPosts []structs.Post
 }
 
 // ServeHTTP handles the HTTP requests for the mainInfo struct
@@ -57,8 +56,11 @@ func (m *mainInfo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		m.IsConnected = false
 	}
 
-	m.NumberOfVisit++
-	m.PageName = "Il y a " + strconv.Itoa(m.NumberOfVisit) + " visites !!"
+	var posts list_Post
+
+	posts, _ = GetListRecentPost(db)
+	m.ListRecentPosts = posts.Posts
+
 	t, _ := template.ParseFiles("src/html/index.html")
 	t.Execute(w, m)
 

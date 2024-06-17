@@ -129,7 +129,6 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			action := r.FormValue("action")
 			switch action {
 			case "delete":
-				fmt.Println("delete category")
 				if verifyCookie(r) {
 					idcategory := r.FormValue("id")
 					idcategoryint, _ := strconv.Atoi(idcategory)
@@ -234,7 +233,6 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			listPostLike, _ = GetPostByID(db, postLikeID.PostID)
 			PostsLike = append(PostsLike, listPostLike)
 		}
-		fmt.Println(PostsLike)
 		p.ListPostLike = PostsLike
 
 		t, _ = template.ParseFiles("src/html/user_posts.html")

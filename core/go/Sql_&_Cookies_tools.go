@@ -237,6 +237,34 @@ func GetListPostByUsername(db *sql.DB, username string) (list_Post, error) {
 	return listPost, nil
 }
 
+// Function to get the 3 most recent Posts
+func GetListRecentPost(db *sql.DB) (list_Post, error) {
+	var listPost list_Post
+
+	// Query to get 3 most recent posts
+	postsQuery := `SELECT id, user, text, title, imageURL, category_id FROM post ORDER BY date DESC LIMIT 3`
+	rows, err := db.Query(postsQuery)
+	if err != nil {
+		return listPost, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post structs.Post
+		err := rows.Scan(&post.ID, &post.User, &post.Text, &post.Title, &post.ImageURL, &post.SelectedCategory)
+		if err != nil {
+			return listPost, err
+		}
+		listPost.Posts = append(listPost.Posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return listPost, err
+	}
+
+	return listPost, nil
+}
+
 // Function to create a cookie
 func CreateCookie(w http.ResponseWriter, name string, value string) {
 	cookie := &http.Cookie{

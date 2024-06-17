@@ -91,31 +91,54 @@ body {
     margin-top: 25px;
 }
 
-.image_promo {
-    width: 310px;
-    height: auto;
-    float: left;
+.Last-Post{
+    text-align: center;
+    margin-top: 40px;
 }
 
-.image_promo img {
+.content {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.image_promo, .image_new {
+    width: 310px;
+    height: auto;
+}
+
+.image_promo img, .image_new img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     margin-bottom: 20px;
+    border-radius: 10px;
 }
 
-.image_new {
-    width: 310px;
-    height: auto;
-    float: right;
+.Recent-Post {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-grow: 1;
+    gap: 20px;
+    margin-top: 25px;
 }
 
-.image_new img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    margin-bottom: 20px;
+.post-link {
+    text-decoration: none;
+    color: inherit;
 }
+
+.post {
+    background: #f0f0f0;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1 1 300px;
+    max-width: 300px;
+    box-sizing: border-box;
+}
+
 
 /*create post */
 
