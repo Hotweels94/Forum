@@ -94,12 +94,34 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de la récupération des posts de la catégorie", http.StatusInternalServerError)
 				return
 			}
+
 			if verifyCookie(r) {
 				posts.IsConnected = true
+				cookie, err := getCookie(r, "session_token")
+				if err != nil {
+					if err == http.ErrNoCookie {
+						// If the cookie is not set, return an unauthorized status
+						w.WriteHeader(http.StatusUnauthorized)
+						fmt.Println(err)
+						return
+					}
+					// For any other type of error, return a bad request status
+					w.WriteHeader(http.StatusBadRequest)
+					fmt.Println(err)
+					return
+				}
+				sessionToken := cookie
+
+				userSession, exists = userSessions[sessionToken]
+				if !exists {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
 				posts.User = userSession
 			} else {
 				posts.IsConnected = false
 			}
+
 			t, _ := template.ParseFiles("src/html/list_post.html")
 			t.Execute(w, posts)
 		} else if ch.User.Role == "admin" || ch.User.Role == "moderator" {
@@ -179,6 +201,7 @@ type list_Post struct {
 	User         structs.User
 	ListPostLike []structs.Post
 	IsConnected  bool
+	UserPostName string
 }
 
 // ServeHTTP handles the HTTP requests for the list_Post struct
@@ -222,7 +245,7 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if r.URL.Query().Get("username") != "" {
 			username := r.URL.Query().Get("username")
-			p.User.Username = username
+			p.UserPostName = username
 			posts, err = GetListPostByUsername(db, username)
 			p.Posts = posts.Posts
 			if err != nil {
@@ -242,7 +265,28 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.ListPostLike = PostsLike
 
 		if verifyCookie(r) {
-			p.IsConnected = true
+			cookie, err := getCookie(r, "session_token")
+			if err != nil {
+				if err == http.ErrNoCookie {
+					// If the cookie is not set, return an unauthorized status
+					w.WriteHeader(http.StatusUnauthorized)
+					fmt.Println(err)
+					return
+				}
+				// For any other type of error, return a bad request status
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Println(err)
+				return
+			}
+			// Get the session Token from the cookie
+			sessionToken := cookie
+
+			// Verify if the session user exist in the map of user Sessions
+			userSession, exists = userSessions[sessionToken]
+			if !exists {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 			p.User = userSession
 		} else {
 			p.IsConnected = false

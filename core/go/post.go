@@ -305,12 +305,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
-			if verifyCookie(r) {
-				p.IsConnected = true
-				p.User = userSession
-			} else {
-				p.IsConnected = false
-			}
 			// insert a post in the db
 			if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" { //double check useless
 				if verifyCookie(r) {
@@ -443,12 +437,34 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/report":
 		var reportedPosts ReportedPosts
+
 		if verifyCookie(r) {
 			reportedPosts.IsConnected = true
+			cookie, err := getCookie(r, "session_token")
+			if err != nil {
+				if err == http.ErrNoCookie {
+					// If the cookie is not set, return an unauthorized status
+					w.WriteHeader(http.StatusUnauthorized)
+					fmt.Println(err)
+					return
+				}
+				// For any other type of error, return a bad request status
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Println(err)
+				return
+			}
+			sessionToken := cookie
+
+			userSession, exists = userSessions[sessionToken]
+			if !exists {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 			reportedPosts.User = userSession
 		} else {
 			reportedPosts.IsConnected = false
 		}
+
 		// see all reported post
 		listpostreported, err := getReportedPosts(db)
 		if err != nil {
@@ -456,8 +472,6 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		reportedPosts.Posts = listpostreported
-		fmt.Print("report  ")
-		fmt.Println(reportedPosts)
 		t, _ := template.ParseFiles("src/html/report.html")
 		t.Execute(w, reportedPosts)
 		return

@@ -38,7 +38,7 @@
     </nav>
     <div class="user_posts_content">
         <!-- Post of the selected user -->
-        <h1>Posts de : {{.User.Username}}</h1>
+        <h1>Posts de : {{.UserPostName}}</h1>
         {{range .Posts}}
             <a href="/post?id={{.ID}}" class="post-link">
                 <div class="post">
@@ -48,7 +48,7 @@
         {{end}}
 
         <!-- Post like by the selected user -->
-        <h1>Les likes de : {{.User.Username}}</h1>
+        <h1>Les likes de : {{.UserPostName}}</h1>
         {{range .ListPostLike}}
             <a href="/post?id={{.ID}}" class="post-link">
                 <div class="post">
