@@ -7,6 +7,31 @@
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body class="create-category-page">
+            <nav class="navbar">
+            <div class="onglets">
+                <a href="/">Acueil</a>
+                <a href="/list_category">Catégories</a>
+        
+                {{if .IsConnected}}
+
+                    {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
+                        <a href="/post">Créer un post</a>
+                    {{end}}
+
+                    {{if eq .User.Role "admin"}}
+                        <a href="/report">Posts Signalés</a>
+                    {{end}}
+                {{end}}
+            </div>
+            <div class="login-register">
+                {{if .IsConnected}}
+                    <a href="/profile"><button class="profile_button_index">{{.User.Username}}</button></a>
+                {{else}}
+                    <a href="/login"><button class="login_button_index">Login</button></a>
+                    <a href="/register"><button class="register_button_index">Register</button></a>
+                {{end}}
+            </div>
+        </nav>
     <h1>Créer une catégorie</h1>
     <form action="/category" method="post">
         <label for="name">Nom de la catégorie:</label><br>

@@ -14,7 +14,7 @@
                 <a href="/list_category">Catégories</a>
 
                 {{if .IsConnected}}
-                    {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
+                    {{if or (eq .User.Role "admin") (eq .User.Role "moderator")}}
                         <a href="/category">Créer une categorie</a>
                     {{end}}
 

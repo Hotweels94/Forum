@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body class="post-detail-page">
+    <nav class="navbar">
+        <div class="onglets">
+            <a href="/">Acueil</a>
+            <a href="/list_category">Catégories</a>
+
+            {{if .IsConnected}}
+                {{if or (eq .User.Role "admin") (eq .User.Role "moderator")}}
+                    <a href="/category">Créer une categorie</a>
+                {{end}}
+
+                {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
+                    <a href="/post">Créer un post</a>
+                {{end}}
+
+                {{if eq .User.Role "admin"}}
+                    <a href="/report">Posts Signalés</a>
+                {{end}}
+            {{end}}
+        </div>
+        <div class="login-register">
+            {{if .IsConnected}}
+                <a href="/profile"><button class="profile_button_index">{{.User.Username}}</button></a>
+            {{else}}
+                <a href="/login"><button class="login_button_index">Login</button></a>
+                <a href="/register"><button class="register_button_index">Register</button></a>
+            {{end}}
+        </div>
+    </nav>
     <div class="post-detail">
         <h2>{{.Post.Title}}</h2>
         <h3>Post de : <a href="/user_posts?username={{.Post.User}}"><button class="user-post-button">{{.Post.User}}</button></a></h3>

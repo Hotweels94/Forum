@@ -85,7 +85,6 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/category":
-
 		// get all post from a category
 		if r.URL.Query().Get("id") != "" {
 			id := r.URL.Query().Get("id")
@@ -95,9 +94,15 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Erreur lors de la récupération des posts de la catégorie", http.StatusInternalServerError)
 				return
 			}
+			if verifyCookie(r) {
+				posts.IsConnected = true
+				posts.User = userSession
+			} else {
+				posts.IsConnected = false
+			}
 			t, _ := template.ParseFiles("src/html/list_post.html")
 			t.Execute(w, posts)
-		} else if ch.User.Role == "admin" || ch.User.Role == "moderator" || ch.User.Role == "user" {
+		} else if ch.User.Role == "admin" || ch.User.Role == "moderator" {
 			// insert a category in the db if got the right rank
 			if r.Method == "POST" {
 				err := r.ParseForm()
@@ -118,7 +123,7 @@ func (ch *Categories) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			t, _ := template.ParseFiles("src/html/category.html")
-			t.Execute(w, nil)
+			t.Execute(w, ch)
 		} else {
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
@@ -173,6 +178,7 @@ type list_Post struct {
 	NameCategory string
 	User         structs.User
 	ListPostLike []structs.Post
+	IsConnected  bool
 }
 
 // ServeHTTP handles the HTTP requests for the list_Post struct
@@ -234,6 +240,13 @@ func (p list_Post) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			PostsLike = append(PostsLike, listPostLike)
 		}
 		p.ListPostLike = PostsLike
+
+		if verifyCookie(r) {
+			p.IsConnected = true
+			p.User = userSession
+		} else {
+			p.IsConnected = false
+		}
 
 		t, _ = template.ParseFiles("src/html/user_posts.html")
 		t.Execute(w, p)

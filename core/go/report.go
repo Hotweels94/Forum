@@ -6,7 +6,9 @@ import (
 )
 
 type ReportedPosts struct {
-	Posts []structs.Post
+	Posts       []structs.Post
+	User        structs.User
+	IsConnected bool
 }
 
 // update to set a post reported

@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body class="profile-page">
+    <nav class="navbar">
+        <div class="onglets">
+            <a href="/">Acueil</a>
+            <a href="/list_category">Catégories</a>
+
+            {{if .IsConnected}}
+                {{if or (eq .User.Role "admin") (eq .User.Role "moderator")}}
+                    <a href="/category">Créer une categorie</a>
+                {{end}}
+
+                {{if or (eq .User.Role "admin") (eq .User.Role "moderator") (eq .User.Role "user")}}
+                    <a href="/post">Créer un post</a>
+                {{end}}
+
+                {{if eq .User.Role "admin"}}
+                    <a href="/report">Posts Signalés</a>
+                {{end}}
+            {{end}}
+        </div>
+        <div class="login-register">
+            {{if .IsConnected}}
+                <a href="/profile"><button class="profile_button_index">{{.User.Username}}</button></a>
+            {{else}}
+                <a href="/login"><button class="login_button_index">Login</button></a>
+                <a href="/register"><button class="register_button_index">Register</button></a>
+            {{end}}
+        </div>
+    </nav>
     <div class="profile_content">
         <h1>Vous êtes connecté {{.User.Username}}</h1>
         <h2>Votre email : {{.User.Email}}</h2>
@@ -26,9 +54,6 @@
 
         <!-- Button to the the post from the connected user -->
         <a href="/user_posts?username={{.User.Username}}"><button class="user_post_button">Mes posts</button></a>
-
-        <!-- Button to go back to home -->
-        <a href="/"><button class="acceuil_button_profile">Accueil</button></a>
 
         <!-- If the user is an admin he can go to the admin panel -->
         {{if eq .User.Role "admin"}}

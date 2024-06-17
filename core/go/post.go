@@ -305,6 +305,12 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.Method == "POST" {
+			if verifyCookie(r) {
+				p.IsConnected = true
+				p.User = userSession
+			} else {
+				p.IsConnected = false
+			}
 			// insert a post in the db
 			if pageData.User.Role == "admin" || pageData.User.Role == "moderator" || pageData.User.Role == "user" { //double check useless
 				if verifyCookie(r) {
@@ -436,14 +442,24 @@ func (p *Posts) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "/report":
+		var reportedPosts ReportedPosts
+		if verifyCookie(r) {
+			reportedPosts.IsConnected = true
+			reportedPosts.User = userSession
+		} else {
+			reportedPosts.IsConnected = false
+		}
 		// see all reported post
-		reportedPosts, err := getReportedPosts(db)
+		listpostreported, err := getReportedPosts(db)
 		if err != nil {
 			http.Error(w, "Erreur lors de la récupération des posts signalés", http.StatusInternalServerError)
 			return
 		}
+		reportedPosts.Posts = listpostreported
+		fmt.Print("report  ")
+		fmt.Println(reportedPosts)
 		t, _ := template.ParseFiles("src/html/report.html")
-		t.Execute(w, ReportedPosts{Posts: reportedPosts})
+		t.Execute(w, reportedPosts)
 		return
 	default:
 		http.NotFound(w, r)

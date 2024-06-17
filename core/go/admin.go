@@ -8,8 +8,9 @@ import (
 )
 
 type Admin struct {
-	User     structs.User
-	ListUser []structs.User
+	User        structs.User
+	ListUser    []structs.User
+	IsConnected bool
 }
 
 // ServeHTTP handles the HTTP requests for the Admin struct
@@ -26,6 +27,8 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// We verify if th user is connected and has cookie
 	if verifyCookie(r) {
+		a.IsConnected = true
+		a.User = userSession
 		// We get the list of all created users in the database
 		users, err := getAllUsers(db)
 
@@ -83,7 +86,8 @@ func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-
+	fmt.Print("admin  ")
+	fmt.Println(a)
 	t, _ = template.ParseFiles("src/html/panel_admin.html")
 	t.Execute(w, a)
 }

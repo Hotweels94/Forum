@@ -9,7 +9,8 @@ import (
 )
 
 type Profil struct {
-	User structs.User
+	User        structs.User
+	IsConnected bool
 }
 
 var userSession structs.User
@@ -29,6 +30,7 @@ func (p *Profil) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// We verify if th user is connected and has cookie
 	if verifyCookie(r) {
+		p.IsConnected = true
 		// We get the cookie
 		cookie, err := getCookie(r, "session_token")
 		if err != nil {
