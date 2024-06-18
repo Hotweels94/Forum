@@ -915,3 +915,53 @@ body {
     display: block;
     margin: 20px auto;
 }
+
+/* post page Grid */
+
+.grid-posts h1 {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 20px;
+    grid-auto-rows: 1fr;
+}
+
+.grid-post-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.grid-post {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background-color: #1f1f1f;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.grid-post:hover {
+    background-color: #2c2c2c;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.grid-post h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.grid-post p {
+    margin: 10px 0;
+}
+
+.grid-post img {
+    max-width: 100%;
+    border-radius: 5px;
+    margin-top: 10px;
+}
