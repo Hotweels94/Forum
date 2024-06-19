@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Connexion</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
 <body class="login-page">
     <div class="login_page">
-        <h1>Login</h1>
+        <h1>Connexion</h1>
         <!-- Send data to the server -->
         <form method="post" action="/login">
-            <label for="username or email">Username or email:</label>
+            <label for="username or email">Pseudo ou Email:</label>
             <input type="text" id="username or email" name="username or email" required><br>
-            <label for="password">Password:</label>
+            <label for="password">Mot de passe:</label>
             <input type="password" id="password" name="password" required><br>
             <input class="login_button" type="submit" value="Login">
-            <h4>Vous n'avez pas encore de comptes ? <a href="/register">Créer un compte</a></h4>
+            <h4>Vous n'avez pas encore de compte ? <a href="/register">Créer un compte</a></h4>
         </form>
     </div>
 </body>

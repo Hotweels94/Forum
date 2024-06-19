@@ -30,8 +30,8 @@
             {{if .IsConnected}}
                 <a href="/profile"><button class="profile_button_index">{{.User.Username}}</button></a>
             {{else}}
-                <a href="/login"><button class="login_button_index">Login</button></a>
-                <a href="/register"><button class="register_button_index">Register</button></a>
+                <a href="/login"><button class="login_button_index">Connexion</button></a>
+                <a href="/register"><button class="register_button_index">Créer un compte</button></a>
             {{end}}
         </div>
     </nav>
@@ -43,7 +43,7 @@
         <div class="modify_profile">
             <form action="/profile" method="POST">
                 <h3>Modification d'informations :</h3>
-                <label for="username">Username:</label>
+                <label for="username">Pseudo:</label>
                 <input type="text" id="username" name="username"><br>
                 <input class="modify_button" type="submit" name="action" value="Modifier votre pseudo">
                 <label for="email">Email:</label>
