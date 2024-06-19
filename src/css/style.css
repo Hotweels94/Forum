@@ -908,14 +908,6 @@ body {
     margin: 10px 0;
 }
 
-.user-posts-page .user_posts_content img {
-    max-width: 25%;
-    max-height: 25%;
-    border-radius: 25px;
-    display: block;
-    margin: 20px auto;
-}
-
 /* post page Grid */
 
 .grid-posts h1 {

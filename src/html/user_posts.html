@@ -37,25 +37,37 @@
         </div>
     </nav>
     <div class="user_posts_content">
-        <!-- Post of the selected user -->
-        <h1>Posts de : {{.UserPostName}}</h1>
-        {{range .Posts}}
-            <a href="/post?id={{.ID}}" class="post-link">
-                <div class="post">
-                    <h2>{{.Title}}</h2>
-                </div>
-            </a>
-        {{end}}
+        <div class="grid-posts">
+            <!-- Post of the selected user -->
+            <h1>Posts de : {{.UserPostName}}</h1>
+            <div class="posts-grid">
+                {{range .Posts}}
+                    <a href="/post?id={{.ID}}" class="post-link">
+                        <div class="post">
+                            <h2>{{.Title}}</h2>
+                            {{if .ImageURL}}
+                                <img src="{{.ImageURL}}" alt="">
+                            {{end}}
+                        </div>
+                    </a>
+                {{end}}
+            </div>
 
-        <!-- Post like by the selected user -->
-        <h1>Les likes de : {{.UserPostName}}</h1>
-        {{range .ListPostLike}}
-            <a href="/post?id={{.ID}}" class="post-link">
-                <div class="post">
-                    <h2>{{.Title}}</h2>
-                </div>
-            </a>
-        {{end}}
+            <!-- Post like by the selected user -->
+            <h1>Les likes de : {{.UserPostName}}</h1>
+            <div class="posts-grid">
+                {{range .ListPostLike}}
+                    <a href="/post?id={{.ID}}" class="post-link">
+                        <div class="post">
+                            <h2>{{.Title}}</h2>
+                            {{if .ImageURL}}
+                                <img src="{{.ImageURL}}" alt="">
+                            {{end}}
+                        </div>
+                    </a>
+                {{end}}
+            </div>
+        </div>
     </div>
 </body>
 </html>
