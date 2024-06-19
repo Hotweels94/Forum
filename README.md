@@ -3,6 +3,7 @@
 ## How to Launch the Forum
 
 To launch the forum, you can clone or directly download this Repository. Then go to your terminal, in the folder where you cloned / downloaded the application, then execute the command `go run main.go`. Then go to your browser and type the URL: http://localhost:8080/
+There is a database for demonstration with examples Post, account, comments, reported Posts ... If you want to be an admin in this version of the database, you can connect as Hotweels94 (username) and use the password : 123. If you want to use it correctly, you can delete the database and when you create a account, you change the role in the database directly for more security.
 
 ## Objectives
 
@@ -66,3 +67,8 @@ Implement filtering by:
 
 - Encrypt passwords and optionally the database.
 - Implement secure sessions and cookies.
+
+## Authors
+
+- [@Thunred](https://github.com/Thunred)
+- [@Hotweels94](https://github.com/Hotweels94)
